@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.329
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NoteBookGame", "NoteBookGame\NoteBookGame.csproj", "{CA9F8E2A-A11D-481A-B8D5-4A97DB7BC5A6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeonpaRPG", "NoteBookGame\DeonpaRPG.csproj", "{CA9F8E2A-A11D-481A-B8D5-4A97DB7BC5A6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
