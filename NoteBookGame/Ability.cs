@@ -326,10 +326,46 @@ namespace NoteBookGame
 
         public void CalculateInventoryWeight()
         {
+            Character character = Character.GetInstance();
+            int gun = 0;
+            int armor = 0;
+            int necklace = 0;
+            int avatar = 0;
+            int pendant = 0;
+            if (character.gun != null)
+            {
+                gun = character.gun.weight;
+            }
+            if (character.armor != null)
+            {
+                armor = character.armor.weight;
+            }
+            if (character.necklace != null)
+            {
+                necklace = character.necklace.weight;
+            }
+            if (character.avatar != null)
+            {
+                avatar = character.avatar.weight;
+            }
+            if (character.pendant != null)
+            {
+                pendant = character.pendant.weight;
+            }
+
+            inventoryWeight.current = gun + armor + necklace + avatar + pendant;
+        }
+
+        public void CalculateInventoryWeightBonus()
+        {
             const int _default = 20;
             Character character = Character.GetInstance();
             int level = 0;
             int gun = 0;
+            int armor = 0;
+            int necklace = 0;
+            int avatar = 0;
+            int pendant = 0;
             for (int i = 0; i <= character.professionLevel; i++)
             {
                 level += profWeight[i];
@@ -338,8 +374,24 @@ namespace NoteBookGame
             {
                 gun = character.gun.effect.inventoryWeight.max;
             }
+            if (character.armor != null)
+            {
+                armor = character.armor.effect.inventoryWeight.max;
+            }
+            if (character.necklace != null)
+            {
+                necklace = character.necklace.effect.inventoryWeight.max;
+            }
+            if (character.avatar != null)
+            {
+                avatar = character.avatar.effect.inventoryWeight.max;
+            }
+            if (character.pendant != null)
+            {
+                pendant = character.pendant.effect.inventoryWeight.max;
+            }
 
-            inventoryWeight.max = _default + level + gun;
+            inventoryWeight.max = _default + level + gun + armor + necklace + avatar + pendant;
         }
 
         public void CalculateHP()

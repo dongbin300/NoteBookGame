@@ -44,7 +44,7 @@ namespace NoteBookGame
         public int level;
         public Ability ability;
         public Ability additionalAbility;
-        public State questProgress;
+        public int questProgress;
         public long requireEXP;
         public long exp;
         public int gold;
@@ -73,35 +73,85 @@ namespace NoteBookGame
         {
             if (level >= eo.level)
             {
-                gun = eo;
+                switch(eo.type)
+                {
+                    case EquipObject.EquipObjectTypes.Gun:
+                        gun = eo;
+                        break;
+                    case EquipObject.EquipObjectTypes.Armor:
+                        armor = eo;
+                        break;
+                    case EquipObject.EquipObjectTypes.Necklace:
+                        necklace = eo;
+                        break;
+                    case EquipObject.EquipObjectTypes.Avatar:
+                        avatar = eo;
+                        break;
+                    case EquipObject.EquipObjectTypes.Pendant:
+                        pendant = eo;
+                        break;
+                    case EquipObject.EquipObjectTypes.Others:
+                        others = eo;
+                        break;
+                    case EquipObject.EquipObjectTypes.AbilityStone:
+                        abilityStone = eo;
+                        break;
+                }
                 Console.WriteLine(">" + eo.name + "을 장착했습니다.");
             }
             else
             {
-                Console.WriteLine(">레벨이 낮아 장착할 수 없습니다.");
+                Console.WriteLine(">레벨이 낮아서 장착할 수 없습니다.");
             }
         }
 
-        public void Attack(Monster monster)
+        public void Buy(EquipObject eo)
         {
+            if (gold >= eo.price)
+            {
+                if (level >= eo.level)
+                {
+                    gold -= eo.price;
+                    Equip(eo);
+                }
+                else
+                {
+                    Console.WriteLine(">레벨이 낮아서 구매할 수 없습니다.");
+                }
+            }
+            else
+            {
+                Console.WriteLine(">돈이 부족해서 구매할 수 없습니다.");
+            }
+        }
+
+        public bool Attack(Monster monster)
+        {
+            ability.hp.current += ability.hpRecovery;
             monster.hpCur -= ability.damage;
             Console.WriteLine($">{monster.name} 피해: {ability.damage}");
 
+            /* 몬스터가 죽음 */
             if (monster.hpCur <= 0)
             {
+                monster.Dispose();
                 int getGold = (int)(monster.gold * (1 + (float)ability.goldBonus / 100));
                 int getExp = (int)(monster.exp * (1 + (float)ability.expBonus / 100));
                 int getSp = (int)(monster.sp * (1 + (float)ability.spBonus / 100));
                 gold += getGold;
                 exp += getExp;
                 sp += getSp;
+                LevelUp();
                 Console.WriteLine($">{monster.name}를 잡았습니다. 골드+ {getGold}, Exp+ {getExp}, Sp+ {getSp}");
+
+                return false;
             }
             else
             {
                 Random random = new Random();
                 int specialDefenseOn = random.Next(2);
-                int monsterDamage = monster.attack - ability.defense - ability.specialDefense * specialDefenseOn;
+                int monsterDamage = monster.attack - ability.defense / 10 - ability.specialDefense / 10 * specialDefenseOn;
+                /* 몬스터의 공격력이 캐릭터의 방어력보다 낮음 */
                 if (monsterDamage < 0)
                 {
                     monsterDamage = 0;
@@ -109,6 +159,25 @@ namespace NoteBookGame
 
                 ability.hp.current -= monsterDamage;
                 Console.WriteLine($">{nickname} 피해: {monsterDamage}");
+
+                /* 캐릭터가 죽음 */
+                if (ability.hp.current <= 0)
+                {
+                    return false;
+                }
+
+                return true;
+            }
+        }
+
+        private void LevelUp()
+        {
+            if (exp >= requireEXP)
+            {
+                exp -= requireEXP;
+                level++;
+                requireEXP = ability.requireEXP[level];
+                Console.WriteLine(">레벨 업!");
             }
         }
     }
