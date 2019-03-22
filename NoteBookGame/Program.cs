@@ -9,12 +9,27 @@ namespace NoteBookGame
 {
     class Program
     {
+        public enum Screens
+        {
+            Main,
+            Deongeon, DeongeonMonster,
+            Shop, ShopChild, ShopChildStat,
+            Skill,
+            Save,
+            MyStat
+        };
+        static Screens screen;
+        static Deongeon selectedDeongeon;
+        static EquipObject.EquipObjectTypes equipObjectType;
+        static EquipObject selectedEquipObject;
+
         static Character user;
         static EODB eodb;
         static DeongeonDB deongeondb;
         static string menuOrder = "1234567890QWERTYUIOPASDFGHJKLZXCVBNM";
         static ConsoleKey[] keyOrder = { ConsoleKey.D1, ConsoleKey.D2, ConsoleKey.D3, ConsoleKey.D4, ConsoleKey.D5, ConsoleKey.D6, ConsoleKey.D7, ConsoleKey.D8, ConsoleKey.D9, ConsoleKey.D0, ConsoleKey.Q, ConsoleKey.W, ConsoleKey.E, ConsoleKey.R, ConsoleKey.T, ConsoleKey.Y, ConsoleKey.U, ConsoleKey.I, ConsoleKey.O, ConsoleKey.P, ConsoleKey.A, ConsoleKey.S, ConsoleKey.D, ConsoleKey.F, ConsoleKey.G, ConsoleKey.H, ConsoleKey.J, ConsoleKey.K, ConsoleKey.L, ConsoleKey.Z, ConsoleKey.X, ConsoleKey.C, ConsoleKey.V, ConsoleKey.B, ConsoleKey.N, ConsoleKey.M };
         static bool stay;
+        static bool play;
 
         static void Main(string[] args)
         {
@@ -54,254 +69,313 @@ namespace NoteBookGame
              * 
              */
 
-            FileStream fs = new FileStream("account.cha", FileMode.Open);
-            StreamReader sr = new StreamReader(fs);
-
-            string nickname = sr.ReadLine();
-            string profession = sr.ReadLine();
-            int level = int.Parse(sr.ReadLine());
-            int questProgress = int.Parse(sr.ReadLine());
-            int exp = int.Parse(sr.ReadLine());
-            int gold = int.Parse(sr.ReadLine());
-            string gun = sr.ReadLine();
-            string armor = sr.ReadLine();
-            string necklace = sr.ReadLine();
-            string avatar = sr.ReadLine();
-            string pendant = sr.ReadLine();
-            string others = sr.ReadLine();
-            string abilityStone = sr.ReadLine();
-            sr.Close();
-            fs.Close();
-            Console.WriteLine(">계정 데이터를 불러왔습니다.");
-
             user = Character.GetInstance();
             eodb = EODB.GetInstance();
             deongeondb = DeongeonDB.GetInstance();
 
-            user.nickname = nickname;
-            user.profession = profession;
-            user.level = level;
-            user.questProgress = questProgress;
-            user.exp = exp;
-            user.gold = gold;
-            user.gun = eodb.Equip(gun);
-            user.armor = eodb.Equip(armor);
-            user.necklace = eodb.Equip(necklace);
-            user.avatar = eodb.Equip(avatar);
-            user.pendant = eodb.Equip(pendant);
-            user.others = eodb.Equip(others);
-            user.abilityStone = eodb.Equip(abilityStone);
+            /* 캐릭터 로드 */
+            FileStream fs = new FileStream("account.cha", FileMode.Open);
+            StreamReader sr = new StreamReader(fs);
+            user.nickname = sr.ReadLine();
+            user.profession = sr.ReadLine();
+            user.level = int.Parse(sr.ReadLine());
+            user.questProgress = int.Parse(sr.ReadLine());
+            user.exp = int.Parse(sr.ReadLine());
+            user.gold = int.Parse(sr.ReadLine());
+            user.gun = eodb.Equip(sr.ReadLine());
+            user.armor = eodb.Equip(sr.ReadLine());
+            user.necklace = eodb.Equip(sr.ReadLine());
+            user.avatar = eodb.Equip(sr.ReadLine());
+            user.pendant = eodb.Equip(sr.ReadLine());
+            user.others = eodb.Equip(sr.ReadLine());
+            user.abilityStone = eodb.Equip(sr.ReadLine());
+            sr.Close();
+            fs.Close();
+            Console.WriteLine(">계정 데이터를 불러왔습니다.");
 
+            /* 캐릭터 능력치 계산 */
             user.ability = new Ability("");
             CalculateCharacterAbility();
-
             user.ability.hp.current = user.ability.hp.max;
             user.ability.mp.current = user.ability.mp.max;
 
-            while (true)
+            play = true;
+            screen = Screens.Main;
+
+            while (play)
             {
-                stay = true;
-                Console.WriteLine("===던파 RPG===");
-                Console.WriteLine(">[1] 던전");
-                Console.WriteLine(">[2] 상점");
-                //Console.WriteLine(">[3] 던전");
-                //Console.WriteLine(">[4] 던전");
-                //Console.WriteLine(">[5] 던전");
-                //Console.WriteLine(">[6] 던전");
-                //Console.WriteLine(">[7] 던전");
-                //Console.WriteLine(">[8] 던전");
-                //Console.WriteLine(">[9] 던전");
-                //Console.WriteLine(">[0] 던전");
-                //Console.WriteLine(">[Q] 퀘스트");
-                //Console.WriteLine(">[S] 스킬");
-                Console.WriteLine(">[A] 저장");
-                Console.WriteLine(">[W] 내 스탯");
-
-                ConsoleKeyInfo keys = Console.ReadKey(true);
-                switch (keys.Key)
+                switch (screen)
                 {
-                    case ConsoleKey.D1:
-                        while (stay)
-                        {
-                            Console.Clear();
-                            Console.WriteLine("===던전===");
-                            Console.WriteLine(">[ESC] 나가기");
-                            Console.WriteLine(">[1] 휴먼");
-                            Console.WriteLine(">[2] 고블린나라");
-                            Console.WriteLine(">[3] 신전외곽");
-                            Console.WriteLine(">[4] 신전내부");
-                            Console.WriteLine(">[5] 도둑아지트");
-                            Console.WriteLine(">[6] 동화나라");
-                            Console.WriteLine(">[7] 히든맵1");
-                            Console.WriteLine(">[8] 히든맵2");
-                            Console.WriteLine(">[9] 썬더젠틀맨의숙소");
-                            Console.WriteLine(">[0] 헤드스핀의숙소");
-                            Console.WriteLine(">[Q] 던전길목");
-
-                            ConsoleKeyInfo keys2 = Console.ReadKey(true);
-                            switch (keys2.Key)
-                            {
-                                case ConsoleKey.D1:
-                                    Console.Clear();
-                                    while (stay)
-                                    {
-                                        Console.WriteLine("===휴먼===");
-                                        Console.WriteLine(">[ESC] 나가기");
-                                        for (int i = 0; i < deongeondb.human.monsterCount; i++)
-                                        {
-                                            Console.WriteLine($">[{menuOrder[i]}] {deongeondb.human.monsters[i].name}");
-                                        }
-                                        ConsoleKeyInfo keys3 = Console.ReadKey(true);
-                                        for (int i = 0; i < deongeondb.human.monsterCount; i++)
-                                        {
-                                            if (keys3.Key == ConsoleKey.Escape)
-                                            {
-                                                stay = false;
-                                                Console.Clear();
-                                            }
-                                            if (keys3.Key == keyOrder[i])
-                                            {
-                                                Console.Clear();
-                                                Monster monster = Monster.Create(deongeondb.human, deongeondb.human.monsters[i].name);
-                                                bool aliveMonster = true;
-                                                while (aliveMonster)
-                                                {
-                                                    ShowBattle(monster);
-                                                    ConsoleKeyInfo keys4 = Console.ReadKey(true);
-                                                    switch (keys4.Key)
-                                                    {
-                                                        case ConsoleKey.X:
-                                                            Console.Clear();
-                                                            aliveMonster = user.Attack(monster);
-                                                            Console.WriteLine();
-                                                            break;
-                                                        case ConsoleKey.C:
-                                                            Console.Clear();
-                                                            monster.Dispose();
-                                                            aliveMonster = false;
-                                                            break;
-                                                    }
-                                                }
-                                                break;
-                                            }
-                                        }
-                                    }
-                                    break;
-                                case ConsoleKey.Escape:
-                                    stay = false;
-                                    Console.Clear();
-                                    break;
-                            }
-                        }
+                    case Screens.Main:
+                        MainMenu();
                         break;
-
-                    case ConsoleKey.D2:
-                        while (stay)
-                        {
-                            Console.Clear();
-                            Console.WriteLine("===상점===");
-                            Console.WriteLine(">[ESC] 나가기");
-                            Console.WriteLine(">[1] 0~1차 장비");
-                            Console.WriteLine(">[2] 2~4차 장비");
-                            Console.WriteLine(">[3] 5~6차 장비");
-                            Console.WriteLine(">[4] 7~9차 장비");
-                            Console.WriteLine(">[5] 10차~ 장비");
-                            Console.WriteLine(">[6] 포션");
-                            Console.WriteLine(">[7] 아바타");
-                            Console.WriteLine(">[8] 펜던트");
-
-                            ConsoleKeyInfo keys2 = Console.ReadKey(true);
-                            switch (keys2.Key)
-                            {
-                                case ConsoleKey.D1:
-                                    while (stay)
-                                    {
-                                        Console.Clear();
-                                        Console.WriteLine("===0~1차 장비===");
-                                        Console.WriteLine(">[ESC] 나가기");
-                                        EquipObject[] tempEquipObjects = new EquipObject[40];
-                                        int idx = 0;
-                                        for (int i = 0; i < eodb.equipObjectCount; i++)
-                                        {
-                                            if(eodb.equipObjects[i].level >= 1 && eodb.equipObjects[i].level < 48)
-                                            {
-                                                tempEquipObjects[idx] = eodb.equipObjects[i];
-                                                Console.WriteLine($">[{menuOrder[idx]}] {tempEquipObjects[idx].name} Lv{tempEquipObjects[idx].level}");
-                                                idx++;
-                                            }
-                                        }
-                                        ConsoleKeyInfo keys3 = Console.ReadKey(true);
-                                        for (int i = 0; i < idx; i++)
-                                        {
-                                            if (keys3.Key == ConsoleKey.Escape)
-                                            {
-                                                stay = false;
-                                                Console.Clear();
-                                            }
-                                            if (keys3.Key == keyOrder[i])
-                                            {
-                                                Console.Clear();
-                                                while (stay)
-                                                {
-                                                    tempEquipObjects[i].ShowDescription();
-                                                    Console.WriteLine();
-                                                    Console.WriteLine(">[X] 구입");
-                                                    Console.WriteLine(">[C] 취소");
-
-                                                    ConsoleKeyInfo keys4 = Console.ReadKey(true);
-                                                    switch (keys4.Key)
-                                                    {
-                                                        case ConsoleKey.X:
-                                                            Console.Clear();
-                                                            user.Buy(tempEquipObjects[i]);
-                                                            break;
-                                                        case ConsoleKey.C:
-                                                            stay = false;
-                                                            Console.Clear();
-                                                            break;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                    break;
-                                case ConsoleKey.Escape:
-                                    stay = false;
-                                    Console.Clear();
-                                    break;
-                            }
-                        }
+                    case Screens.Deongeon:
+                        DeongeonMenu();
                         break;
-
-                    case ConsoleKey.A:
-                        Console.Clear();
-                        FileStream fsw = new FileStream("account.cha", FileMode.Open);
-                        StreamWriter sw = new StreamWriter(fsw);
-                        sw.WriteLine(user.nickname);
-                        sw.WriteLine(user.profession);
-                        sw.WriteLine(user.level);
-                        sw.WriteLine(user.questProgress);
-                        sw.WriteLine(user.exp);
-                        sw.WriteLine(user.gold);
-                        sw.WriteLine(user.gun.name);
-                        sw.WriteLine(user.armor.name);
-                        sw.WriteLine(user.necklace.name);
-                        sw.WriteLine(user.avatar.name);
-                        sw.WriteLine(user.pendant.name);
-                        sw.WriteLine(user.others.name);
-                        sw.WriteLine(user.abilityStone.name);
-                        sw.Flush();
-                        sw.Close();
-                        fsw.Close();
-                        Console.WriteLine(">계정 데이터를 저장했습니다.");
+                    case Screens.DeongeonMonster:
+                        DeongeonMonsterMenu(selectedDeongeon);
                         break;
-
-                    case ConsoleKey.W:
-                        Console.Clear();
-                        ShowUserCurrentStat();
+                    case Screens.Shop:
+                        ShopMenu();
+                        break;
+                    case Screens.ShopChild:
+                        ShopChildMenu(equipObjectType);
+                        break;
+                    case Screens.ShopChildStat:
+                        ShopChildStatMenu(selectedEquipObject);
+                        break;
+                    case Screens.Skill:
+                        SkillMenu();
+                        break;
+                    case Screens.Save:
+                        SaveMenu();
+                        break;
+                    case Screens.MyStat:
+                        MyStatMenu();
                         break;
                 }
             }
+        }
+
+        static void MainMenu()
+        {
+            Console.WriteLine("===던파 RPG===");
+            Console.WriteLine(">[1] 던전");
+            Console.WriteLine(">[2] 상점");
+            //Console.WriteLine(">[3] 던전");
+            //Console.WriteLine(">[4] 던전");
+            //Console.WriteLine(">[5] 던전");
+            //Console.WriteLine(">[6] 던전");
+            //Console.WriteLine(">[7] 던전");
+            //Console.WriteLine(">[8] 던전");
+            //Console.WriteLine(">[9] 던전");
+            //Console.WriteLine(">[0] 던전");
+            //Console.WriteLine(">[Q] 퀘스트");
+            Console.WriteLine(">[S] 스킬");
+            Console.WriteLine(">[A] 저장");
+            Console.WriteLine(">[W] 내 스탯");
+            Console.WriteLine(">[P] 게임 종료");
+
+            ConsoleKeyInfo keys = Console.ReadKey(true);
+            switch (keys.Key)
+            {
+                case ConsoleKey.D1:
+                    screen = Screens.Deongeon;
+                    break;
+                case ConsoleKey.D2:
+                    screen = Screens.Shop;
+                    break;
+                case ConsoleKey.S:
+                    screen = Screens.Skill;
+                    break;
+                case ConsoleKey.A:
+                    screen = Screens.Save;
+                    break;
+                case ConsoleKey.W:
+                    screen = Screens.MyStat;
+                    break;
+                case ConsoleKey.P:
+                    play = false;
+                    break;
+            }
+        }
+
+        static void DeongeonMonsterBattleMenu(Deongeon deongeon, int monsterIndex)
+        {
+            Monster monster = Monster.Create(deongeon, deongeon.monsters[monsterIndex].name);
+            bool aliveMonster = true;
+            while (aliveMonster)
+            {
+                ShowBattle(monster);
+                ConsoleKeyInfo keys = Console.ReadKey(true);
+                switch (keys.Key)
+                {
+                    case ConsoleKey.X:
+                        Console.Clear();
+                        aliveMonster = user.Attack(monster);
+                        Console.WriteLine();
+                        break;
+                    case ConsoleKey.C:
+                        Console.Clear();
+                        monster.Dispose();
+                        aliveMonster = false;
+                        break;
+                }
+            }
+        }
+
+        static void DeongeonMonsterMenu(Deongeon deongeon)
+        {
+            Console.WriteLine($"==={deongeon.name}===");
+            Console.WriteLine(">[ESC] 나가기");
+            for (int i = 0; i < deongeon.monsterCount; i++)
+            {
+                Console.WriteLine($">[{menuOrder[i]}] {deongeon.monsters[i].name}");
+            }
+            ConsoleKeyInfo keys = Console.ReadKey(true);
+            for (int i = 0; i < deongeon.monsterCount; i++)
+            {
+                if (keys.Key == ConsoleKey.Escape)
+                {
+                    Console.Clear();
+                    screen = Screens.Deongeon;
+                }
+                if (keys.Key == keyOrder[i])
+                {
+                    Console.Clear();
+                    DeongeonMonsterBattleMenu(deongeon, i);
+                    break;
+                }
+            }
+        }
+
+        static void DeongeonMenu()
+        {
+            Console.Clear();
+            Console.WriteLine("===던전===");
+            Console.WriteLine(">[ESC] 나가기");
+            Console.WriteLine(">[1] 휴먼");
+            Console.WriteLine(">[2] 고블린나라");
+            Console.WriteLine(">[3] 신전외곽");
+            Console.WriteLine(">[4] 신전내부");
+            Console.WriteLine(">[5] 도둑아지트");
+            Console.WriteLine(">[6] 동화나라");
+            Console.WriteLine(">[7] 히든맵1");
+            Console.WriteLine(">[8] 히든맵2");
+            Console.WriteLine(">[9] 썬더젠틀맨의숙소");
+            Console.WriteLine(">[0] 헤드스핀의숙소");
+            Console.WriteLine(">[Q] 던전길목");
+
+            ConsoleKeyInfo keys = Console.ReadKey(true);
+            switch (keys.Key)
+            {
+                case ConsoleKey.D1:
+                    Console.Clear();
+                    screen = Screens.DeongeonMonster;
+                    selectedDeongeon = deongeondb.human;
+                    break;
+                case ConsoleKey.Escape:
+                    Console.Clear();
+                    screen = Screens.Main;
+                    break;
+            }
+        }
+
+        static void ShopChildStatMenu(EquipObject eo)
+        {
+            eo.ShowDescription();
+            Console.WriteLine();
+            Console.WriteLine(">[X] 구입");
+            Console.WriteLine(">[C] 취소");
+
+            ConsoleKeyInfo keys = Console.ReadKey(true);
+            switch (keys.Key)
+            {
+                case ConsoleKey.X:
+                    Console.Clear();
+                    user.Buy(eo);
+                    break;
+                case ConsoleKey.C:
+                    Console.Clear();
+                    screen = Screens.ShopChild;
+                    break;
+            }
+        }
+
+        static void ShopChildMenu(EquipObject.EquipObjectTypes type)
+        {
+            Console.Clear();
+            Console.WriteLine("===0~1차 장비===");
+            Console.WriteLine(">[ESC] 나가기");
+            EquipObject[] tempEquipObjects = new EquipObject[40];
+            int idx = 0;
+            for (int i = 0; i < eodb.equipObjectCount; i++)
+            {
+                if (eodb.equipObjects[i].type == type)
+                {
+                    tempEquipObjects[idx] = eodb.equipObjects[i];
+                    Console.WriteLine($">[{menuOrder[idx]}] {tempEquipObjects[idx].name} Lv{tempEquipObjects[idx].level}");
+                    idx++;
+                }
+            }
+            ConsoleKeyInfo keys = Console.ReadKey(true);
+            for (int i = 0; i < idx; i++)
+            {
+                if (keys.Key == ConsoleKey.Escape)
+                {
+                    Console.Clear();
+                    screen = Screens.Shop;
+                }
+                if (keys.Key == keyOrder[i])
+                {
+                    Console.Clear();
+                    screen = Screens.ShopChildStat;
+                    selectedEquipObject = tempEquipObjects[i];
+                }
+            }
+        }
+
+        static void ShopMenu()
+        {
+            Console.Clear();
+            Console.WriteLine("===상점===");
+            Console.WriteLine(">[ESC] 나가기");
+            Console.WriteLine(">[1] 총");
+            Console.WriteLine(">[2] 갑옷");
+            Console.WriteLine(">[3] 목걸이");
+            Console.WriteLine(">[4] 아바타");
+            Console.WriteLine(">[5] 펜던트");
+            Console.WriteLine(">[6] 포션");
+
+            ConsoleKeyInfo keys = Console.ReadKey(true);
+            switch (keys.Key)
+            {
+                case ConsoleKey.D1:
+                    screen = Screens.ShopChild;
+                    equipObjectType = EquipObject.EquipObjectTypes.Gun;
+                    break;
+                case ConsoleKey.Escape:
+                    Console.Clear();
+                    screen = Screens.Main;
+                    break;
+            }
+        }
+
+        static void SkillMenu()
+        {
+
+        }
+
+        static void SaveMenu()
+        {
+            Console.Clear();
+            FileStream fsw = new FileStream("account.cha", FileMode.Open);
+            StreamWriter sw = new StreamWriter(fsw);
+            sw.WriteLine(user.nickname);
+            sw.WriteLine(user.profession);
+            sw.WriteLine(user.level);
+            sw.WriteLine(user.questProgress);
+            sw.WriteLine(user.exp);
+            sw.WriteLine(user.gold);
+            sw.WriteLine(user.gun.name);
+            sw.WriteLine(user.armor.name);
+            sw.WriteLine(user.necklace.name);
+            sw.WriteLine(user.avatar.name);
+            sw.WriteLine(user.pendant.name);
+            sw.WriteLine(user.others.name);
+            sw.WriteLine(user.abilityStone.name);
+            sw.Flush();
+            sw.Close();
+            fsw.Close();
+            Console.WriteLine(">계정 데이터를 저장했습니다.");
+            screen = Screens.Main;
+        }
+
+        static void MyStatMenu()
+        {
+            Console.Clear();
+            ShowUserCurrentStat();
+            screen = Screens.Main;
         }
 
         static void CalculateCharacterAbility()
