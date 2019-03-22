@@ -28,7 +28,6 @@ namespace NoteBookGame
         static DeongeonDB deongeondb;
         static string menuOrder = "1234567890QWERTYUIOPASDFGHJKLZXCVBNM";
         static ConsoleKey[] keyOrder = { ConsoleKey.D1, ConsoleKey.D2, ConsoleKey.D3, ConsoleKey.D4, ConsoleKey.D5, ConsoleKey.D6, ConsoleKey.D7, ConsoleKey.D8, ConsoleKey.D9, ConsoleKey.D0, ConsoleKey.Q, ConsoleKey.W, ConsoleKey.E, ConsoleKey.R, ConsoleKey.T, ConsoleKey.Y, ConsoleKey.U, ConsoleKey.I, ConsoleKey.O, ConsoleKey.P, ConsoleKey.A, ConsoleKey.S, ConsoleKey.D, ConsoleKey.F, ConsoleKey.G, ConsoleKey.H, ConsoleKey.J, ConsoleKey.K, ConsoleKey.L, ConsoleKey.Z, ConsoleKey.X, ConsoleKey.C, ConsoleKey.V, ConsoleKey.B, ConsoleKey.N, ConsoleKey.M };
-        static bool stay;
         static bool play;
 
         static void Main(string[] args)
@@ -180,9 +179,8 @@ namespace NoteBookGame
             }
         }
 
-        static void DeongeonMonsterBattleMenu(Deongeon deongeon, int monsterIndex)
+        static void DeongeonMonsterBattleMenu(Deongeon deongeon, Monster monster)
         {
-            Monster monster = Monster.Create(deongeon, deongeon.monsters[monsterIndex].name);
             bool aliveMonster = true;
             while (aliveMonster)
             {
@@ -223,7 +221,8 @@ namespace NoteBookGame
                 if (keys.Key == keyOrder[i])
                 {
                     Console.Clear();
-                    DeongeonMonsterBattleMenu(deongeon, i);
+                    Monster monster = Monster.Create(deongeon, deongeon.monsters[i].name);
+                    DeongeonMonsterBattleMenu(deongeon, monster);
                     break;
                 }
             }
