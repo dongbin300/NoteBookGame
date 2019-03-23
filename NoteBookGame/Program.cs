@@ -14,7 +14,7 @@ namespace NoteBookGame
             Main,
             Deongeon, DeongeonMonster,
             Shop, ShopChild, ShopChildStat,
-            Skill,
+            Skill, SkillChild, SkillChidStat,
             Save,
             MyStat
         };
@@ -22,10 +22,13 @@ namespace NoteBookGame
         static Deongeon selectedDeongeon;
         static EquipObject.EquipObjectTypes equipObjectType;
         static EquipObject selectedEquipObject;
+        static int selectedSkillLevelMin, selectedSkillLevelMax;
+        static Skill selectedSkill;
 
         static Character user;
         static EODB eodb;
         static DeongeonDB deongeondb;
+        static SkillDB skilldb;
         static string menuOrder = "1234567890QWERTYUIOPASDFGHJKLZXCVBNM";
         static ConsoleKey[] keyOrder = { ConsoleKey.D1, ConsoleKey.D2, ConsoleKey.D3, ConsoleKey.D4, ConsoleKey.D5, ConsoleKey.D6, ConsoleKey.D7, ConsoleKey.D8, ConsoleKey.D9, ConsoleKey.D0, ConsoleKey.Q, ConsoleKey.W, ConsoleKey.E, ConsoleKey.R, ConsoleKey.T, ConsoleKey.Y, ConsoleKey.U, ConsoleKey.I, ConsoleKey.O, ConsoleKey.P, ConsoleKey.A, ConsoleKey.S, ConsoleKey.D, ConsoleKey.F, ConsoleKey.G, ConsoleKey.H, ConsoleKey.J, ConsoleKey.K, ConsoleKey.L, ConsoleKey.Z, ConsoleKey.X, ConsoleKey.C, ConsoleKey.V, ConsoleKey.B, ConsoleKey.N, ConsoleKey.M };
         static bool play;
@@ -71,6 +74,7 @@ namespace NoteBookGame
             user = Character.GetInstance();
             eodb = EODB.GetInstance();
             deongeondb = DeongeonDB.GetInstance();
+            skilldb = SkillDB.GetInstance();
 
             /* 캐릭터 로드 */
             FileStream fs = new FileStream("account.cha", FileMode.Open);
@@ -126,6 +130,8 @@ namespace NoteBookGame
                     case Screens.Skill:
                         SkillMenu();
                         break;
+                    case Screens.SkillChild:
+
                     case Screens.Save:
                         SaveMenu();
                         break;
@@ -284,7 +290,7 @@ namespace NoteBookGame
         static void ShopChildMenu(EquipObject.EquipObjectTypes type)
         {
             Console.Clear();
-            Console.WriteLine("===0~1차 장비===");
+            Console.WriteLine($"==={type}===");
             Console.WriteLine(">[ESC] 나가기");
             EquipObject[] tempEquipObjects = new EquipObject[40];
             int idx = 0;
@@ -340,9 +346,84 @@ namespace NoteBookGame
             }
         }
 
+        static void SkillChildStatMenu(Skill skill)
+        {
+            skill.ShowDescription();
+            Console.WriteLine();
+            Console.WriteLine(">[X] 습득");
+            Console.WriteLine(">[C] 취소");
+
+            ConsoleKeyInfo keys = Console.ReadKey(true);
+            switch (keys.Key)
+            {
+                case ConsoleKey.X:
+                    Console.Clear();
+                    user.Get(skill);
+                    break;
+                case ConsoleKey.C:
+                    Console.Clear();
+                    screen = Screens.SkillChild;
+                    break;
+            }
+        }
+
+        static void SkillChildMenu(int min, int max)
+        {
+            Console.Clear();
+            Console.WriteLine($"===Lv{min}~{max} 스킬===");
+            Console.WriteLine(">[ESC] 나가기");
+            Skill[] tempSkills = new Skill[40];
+            int idx = 0;
+            for (int i = 0; i < skilldb.skillCount; i++)
+            {
+                if (skilldb.skills[i].level >= min && skilldb.skills[i].level <= max)
+                {
+                    tempSkills[idx] = skilldb.skills[i];
+                    Console.WriteLine($">[{menuOrder[idx]}] {tempSkills[idx].name}({tempSkills[idx].level}) Lv{tempSkills[idx].skillLevel}");
+                    idx++;
+                }
+            }
+            ConsoleKeyInfo keys = Console.ReadKey(true);
+            for (int i = 0; i < idx; i++)
+            {
+                if (keys.Key == ConsoleKey.Escape)
+                {
+                    Console.Clear();
+                    screen = Screens.Skill;
+                }
+                if (keys.Key == keyOrder[i])
+                {
+                    Console.Clear();
+                    screen = Screens.SkillChidStat;
+                    selectedSkill = tempSkills[i];
+                }
+            }
+        }
+
         static void SkillMenu()
         {
+            Console.Clear();
+            Console.WriteLine("===상점===");
+            Console.WriteLine(">[ESC] 나가기");
+            Console.WriteLine(">[1] 0~2차 스킬");
+            Console.WriteLine(">[2] 3~4차 스킬");
+            Console.WriteLine(">[3] 5~6차 스킬");
+            Console.WriteLine(">[4] 7~8차 스킬");
+            Console.WriteLine(">[5] 9~10차 스킬");
 
+            ConsoleKeyInfo keys = Console.ReadKey(true);
+            switch (keys.Key)
+            {
+                case ConsoleKey.D1:
+                    screen = Screens.SkillChild;
+                    selectedSkillLevelMin = 0;
+                    selectedSkillLevelMax = 67;
+                    break;
+                case ConsoleKey.Escape:
+                    Console.Clear();
+                    screen = Screens.Main;
+                    break;
+            }
         }
 
         static void SaveMenu()

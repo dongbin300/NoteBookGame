@@ -116,12 +116,46 @@ namespace NoteBookGame
                 }
                 else
                 {
-                    Console.WriteLine(">레벨이 낮아서 구매할 수 없습니다.");
+                    Console.WriteLine(">레벨이 너무 낮습니다.");
                 }
             }
             else
             {
-                Console.WriteLine(">돈이 부족해서 구매할 수 없습니다.");
+                Console.WriteLine(">돈이 부족합니다.");
+            }
+        }
+
+        public void Get(Skill skill)
+        {
+            if(sp >= skill.sp)
+            {
+                if(level >= skill.level)
+                {
+                    if(skill.preSkill)
+                    {
+                        if(skill.skillLevel < skill.masterLevel)
+                        {
+                            sp -= skill.sp;
+                            skill.skillLevel++;
+                        }
+                        else
+                        {
+                            Console.WriteLine(">이미 마스터 레벨입니다.");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine(">선행스킬이 부족합니다.");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine(">레벨이 너무 낮습니다.");
+                }
+            }
+            else
+            {
+                Console.WriteLine(">스킬포인트가 부족합니다.");
             }
         }
 
