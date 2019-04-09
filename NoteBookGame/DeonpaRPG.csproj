@@ -47,6 +47,7 @@
     <Compile Include="Character.cs" />
     <Compile Include="Deongeon.cs" />
     <Compile Include="EquipObject.cs" />
+    <Compile Include="FormatString.cs" />
     <Compile Include="Monster.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

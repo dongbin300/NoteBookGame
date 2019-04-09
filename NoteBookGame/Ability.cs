@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace NoteBookGame
 {
@@ -30,71 +26,27 @@ namespace NoteBookGame
         public int goldBonus;
         public int spBonus;
 
-        public Ability(string effect)
+        public Ability(string effect = "")
         {
-            int se = 0;
-            int val = 0;
-            for (int i = 0; i < effect.Length; i++)
-            {
-                if ((effect[i] >= '0' && effect[i] <= '9') || effect[i] == '-')
-                {
-                    if (i == effect.Length - 1)
-                    {
-                        AssignAbility(effect, se, val, i);
-                    }
-                }
-                else
-                {
-                    if (i > 0)
-                    {
-                        AssignAbility(effect, se, val, i - 1);
-                    }
-                    se = i;
-                }
-            }
-        }
+            Dictionary<string, int> effectDict = FormatString.ParseInt(effect);
 
-        public void AssignAbility(string effect, int se, int val, int i)
-        {
-            val = int.Parse(effect.Substring(se + 1, i - se));
-            switch (effect[se])
+            foreach (KeyValuePair<string, int> temp in effectDict)
             {
-                case 'a':
-                    attack = val;
-                    break;
-                case 'd':
-                    defense = val;
-                    break;
-                case 'c':
-                    specialDefense = val;
-                    break;
-                case 't':
-                    attackSpeed = val;
-                    break;
-                case 'h':
-                    hp.max = val;
-                    break;
-                case 'm':
-                    mp.max = val;
-                    break;
-                case 'r':
-                    hpRecovery = val;
-                    break;
-                case 'v':
-                    mpRecovery = val;
-                    break;
-                case 'w':
-                    inventoryWeight.max = val;
-                    break;
-                case 'e':
-                    expBonus = val;
-                    break;
-                case 'g':
-                    goldBonus = val;
-                    break;
-                case 's':
-                    spBonus = val;
-                    break;
+                switch (temp.Key)
+                {
+                    case "a": attack = temp.Value; break;
+                    case "d": defense = temp.Value; break;
+                    case "c": specialDefense = temp.Value; break;
+                    case "t": attackSpeed = temp.Value; break;
+                    case "h": hp.max = temp.Value; break;
+                    case "m": mp.max = temp.Value; break;
+                    case "r": hpRecovery = temp.Value; break;
+                    case "v": mpRecovery = temp.Value; break;
+                    case "w": inventoryWeight.max = temp.Value; break;
+                    case "e": expBonus = temp.Value; break;
+                    case "g": goldBonus = temp.Value; break;
+                    case "s": spBonus = temp.Value; break;
+                }
             }
         }
 
@@ -116,425 +68,147 @@ namespace NoteBookGame
         {
             damage = attack;
         }
-
-        public void CalculateAttack()
+        
+        // 가장 먼저 호출해야 함.
+        public void CalculateDefault()
         {
-            const int _default = 5;
-            int level = 0;
-            int gun = 0;
-            int armor = 0;
-            int necklace = 0;
-            int avatar = 0;
-            int pendant = 0;
+            attack = 5;
+            defense = 0;
+            specialDefense = 0;
+            attackSpeed = 0;
+            hp.max = 250;
+            mp.max = 100;
+            hpRecovery = 0;
+            mpRecovery = 0;
+            inventoryWeight.current = 0;
+            inventoryWeight.max = 20;
+            expBonus = 0;
+            goldBonus = 0;
+            spBonus = 0;
+        }
+
+        public void CalculateLevel()
+        {
             Character character = Character.GetInstance();
+
+            int levelAttack = 0;
             for (int i = 1, idx = 0; i <= character.level; i++)
             {
                 if (i >= profStageLevel[idx + 1])
                 {
                     idx++;
                 }
-                level += profAttack[idx];
+                levelAttack += profAttack[idx];
             }
-            if (character.gun != null)
-            {
-                gun = character.gun.effect.attack;
-            }
-            if (character.armor != null)
-            {
-                armor = character.armor.effect.attack;
-            }
-            if (character.necklace != null)
-            {
-                necklace = character.necklace.effect.attack;
-            }
-            if (character.avatar != null)
-            {
-                avatar = character.avatar.effect.attack;
-            }
-            if (character.pendant != null)
-            {
-                pendant = character.pendant.effect.attack;
-            }
+            attack += levelAttack;
 
-            attack = _default + level + gun + armor + necklace + avatar + pendant;
-        }
+            int levelDefense = 0;
+            defense += levelDefense;
 
-        public void CalculateDefense()
-        {
-            const int _default = 0;
-            int gun = 0;
-            int armor = 0;
-            int necklace = 0;
-            int avatar = 0;
-            int pendant = 0;
-            Character character = Character.GetInstance();
-            if (character.gun != null)
-            {
-                gun = character.gun.effect.defense;
-            }
-            if (character.armor != null)
-            {
-                armor = character.armor.effect.defense;
-            }
-            if (character.necklace != null)
-            {
-                necklace = character.necklace.effect.defense;
-            }
-            if (character.avatar != null)
-            {
-                avatar = character.avatar.effect.defense;
-            }
-            if (character.pendant != null)
-            {
-                pendant = character.pendant.effect.defense;
-            }
+            int levelSpecialDefense = 0;
+            specialDefense += levelSpecialDefense;
 
-            defense = _default + gun + armor + necklace + avatar + pendant;
-        }
+            int levelAttackSpeed = 0;
+            attackSpeed += levelAttackSpeed;
 
-        public void CalculateSpecialDefense()
-        {
-            const int _default = 0;
-            int gun = 0;
-            int armor = 0;
-            int necklace = 0;
-            int avatar = 0;
-            int pendant = 0;
-            Character character = Character.GetInstance();
-            if (character.gun != null)
+            int levelHP = 0;
+            for (int i = 1, idx = 0; i <= character.level; i++)
             {
-                gun = character.gun.effect.specialDefense;
+                if (i >= profStageLevel[idx + 1])
+                {
+                    idx++;
+                }
+                levelHP += profHP[idx];
             }
-            if (character.armor != null)
-            {
-                armor = character.armor.effect.specialDefense;
-            }
-            if (character.necklace != null)
-            {
-                necklace = character.necklace.effect.specialDefense;
-            }
-            if (character.avatar != null)
-            {
-                avatar = character.avatar.effect.specialDefense;
-            }
-            if (character.pendant != null)
-            {
-                pendant = character.pendant.effect.specialDefense;
-            }
+            hp.max += levelHP;
 
-            specialDefense = _default + gun + armor + necklace + avatar + pendant;
-        }
+            int levelMP = 0;
+            for (int i = 1, idx = 0; i <= character.level; i++)
+            {
+                if (i >= profStageLevel[idx + 1])
+                {
+                    idx++;
+                }
+                levelMP += profMP[idx];
+            }
+            mp.max += levelMP;
 
-        public void CalculateAttackSpeed()
-        {
-            const int _default = 0;
-            int gun = 0;
-            int armor = 0;
-            int necklace = 0;
-            int avatar = 0;
-            int pendant = 0;
-            Character character = Character.GetInstance();
-            if (character.gun != null)
-            {
-                gun = character.gun.effect.attackSpeed;
-            }
-            if (character.armor != null)
-            {
-                armor = character.armor.effect.attackSpeed;
-            }
-            if (character.necklace != null)
-            {
-                necklace = character.necklace.effect.attackSpeed;
-            }
-            if (character.avatar != null)
-            {
-                avatar = character.avatar.effect.attackSpeed;
-            }
-            if (character.pendant != null)
-            {
-                pendant = character.pendant.effect.attackSpeed;
-            }
+            int levelHPRecovery = 0;
+            hpRecovery += levelHPRecovery;
 
-            attackSpeed = _default + gun + armor + necklace + avatar + pendant;
-        }
+            int levelMPRecovery = 0;
+            mpRecovery += levelMPRecovery;
 
-        public void CalculateHPRecovery()
-        {
-            const int _default = 0;
-            int gun = 0;
-            int armor = 0;
-            int necklace = 0;
-            int avatar = 0;
-            int pendant = 0;
-            Character character = Character.GetInstance();
-            if (character.gun != null)
-            {
-                gun = character.gun.effect.hpRecovery;
-            }
-            if (character.armor != null)
-            {
-                armor = character.armor.effect.hpRecovery;
-            }
-            if (character.necklace != null)
-            {
-                necklace = character.necklace.effect.hpRecovery;
-            }
-            if (character.avatar != null)
-            {
-                avatar = character.avatar.effect.hpRecovery;
-            }
-            if (character.pendant != null)
-            {
-                pendant = character.pendant.effect.hpRecovery;
-            }
+            int levelInventoryWeight = 0;
+            inventoryWeight.current += levelInventoryWeight;
 
-            hpRecovery = _default + gun + armor + necklace + avatar + pendant;
-        }
-
-        public void CalculateMPRecovery()
-        {
-            const int _default = 0;
-            int gun = 0;
-            int armor = 0;
-            int necklace = 0;
-            int avatar = 0;
-            int pendant = 0;
-            Character character = Character.GetInstance();
-            if (character.gun != null)
-            {
-                gun = character.gun.effect.mpRecovery;
-            }
-            if (character.armor != null)
-            {
-                armor = character.armor.effect.mpRecovery;
-            }
-            if (character.necklace != null)
-            {
-                necklace = character.necklace.effect.mpRecovery;
-            }
-            if (character.avatar != null)
-            {
-                avatar = character.avatar.effect.mpRecovery;
-            }
-            if (character.pendant != null)
-            {
-                pendant = character.pendant.effect.mpRecovery;
-            }
-
-            mpRecovery = _default + gun + armor + necklace + avatar + pendant;
-        }
-
-        public void CalculateInventoryWeight()
-        {
-            Character character = Character.GetInstance();
-            int gun = 0;
-            int armor = 0;
-            int necklace = 0;
-            int avatar = 0;
-            int pendant = 0;
-            if (character.gun != null)
-            {
-                gun = character.gun.weight;
-            }
-            if (character.armor != null)
-            {
-                armor = character.armor.weight;
-            }
-            if (character.necklace != null)
-            {
-                necklace = character.necklace.weight;
-            }
-            if (character.avatar != null)
-            {
-                avatar = character.avatar.weight;
-            }
-            if (character.pendant != null)
-            {
-                pendant = character.pendant.weight;
-            }
-
-            inventoryWeight.current = gun + armor + necklace + avatar + pendant;
-        }
-
-        public void CalculateInventoryWeightBonus()
-        {
-            const int _default = 20;
-            Character character = Character.GetInstance();
-            int level = 0;
-            int gun = 0;
-            int armor = 0;
-            int necklace = 0;
-            int avatar = 0;
-            int pendant = 0;
+            int levelInventoryWeightBonus = 0;
             for (int i = 0; i <= character.professionLevel; i++)
             {
-                level += profWeight[i];
+                levelInventoryWeightBonus += profWeight[i];
             }
-            if (character.gun != null)
-            {
-                gun = character.gun.effect.inventoryWeight.max;
-            }
-            if (character.armor != null)
-            {
-                armor = character.armor.effect.inventoryWeight.max;
-            }
-            if (character.necklace != null)
-            {
-                necklace = character.necklace.effect.inventoryWeight.max;
-            }
-            if (character.avatar != null)
-            {
-                avatar = character.avatar.effect.inventoryWeight.max;
-            }
-            if (character.pendant != null)
-            {
-                pendant = character.pendant.effect.inventoryWeight.max;
-            }
+            inventoryWeight.max += levelInventoryWeightBonus;
 
-            inventoryWeight.max = _default + level + gun + armor + necklace + avatar + pendant;
+            int levelExpBonus = 0;
+            expBonus += levelExpBonus;
+
+            int levelGoldBonus = 0;
+            goldBonus += levelGoldBonus;
+
+            int levelSpBonus = 0;
+            spBonus += levelSpBonus;
         }
 
-        public void CalculateHP()
+        public void CalculateEquipObject(EquipObject eo)
         {
-            const int _default = 250;
             Character character = Character.GetInstance();
-            int level = 0;
-            int gun = 0;
-            for (int i = 1, idx = 0; i <= character.level; i++)
-            {
-                if (i >= profStageLevel[idx + 1])
-                {
-                    idx++;
-                }
-                level += profHP[idx];
-            }
-            if (character.gun != null)
-            {
-                gun = character.gun.effect.hp.max;
-            }
+            
+            int eoAttack = eo.effect.attack;
+            attack += eoAttack;
 
-            hp.max = _default + level + gun;
+            int eoDefense = eo.effect.defense;
+            defense += eoDefense;
+
+            int eoSpecialDefense = eo.effect.specialDefense;
+            specialDefense += eoSpecialDefense;
+
+            int eoAttackSpeed = eo.effect.attackSpeed;
+            attackSpeed += eoAttackSpeed;
+
+            int eoHP = eo.effect.hp.max;
+            hp.max += eoHP;
+
+            int eoMP = eo.effect.mp.max;
+            mp.max += eoMP;
+
+            int eoHPRecovery = eo.effect.hpRecovery;
+            hpRecovery += eoHPRecovery;
+
+            int eoMPRecovery = eo.effect.mpRecovery;
+            mpRecovery += eoMPRecovery;
+
+            int eoInventoryWeight = eo.weight;
+            inventoryWeight.current += eoInventoryWeight;
+
+            int eoInventoryWeightBonus = eo.effect.inventoryWeight.max;
+            inventoryWeight.max += eoInventoryWeightBonus;
+
+            int eoExpBonus = eo.effect.expBonus;
+            expBonus += eoExpBonus;
+
+            int eoGoldBonus = eo.effect.goldBonus;
+            goldBonus += eoGoldBonus;
+
+            int eoSpBonus = eo.effect.spBonus;
+            spBonus += eoSpBonus;
         }
 
-        public void CalculateMP()
+        public void CalculateSkill(SkillDB skilldb, Skill skill)
         {
-            const int _default = 100;
-            Character character = Character.GetInstance();
-            int level = 0;
-            int gun = 0;
-            for (int i = 1, idx = 0; i <= character.level; i++)
+            foreach (KeyValuePair<string, int> temp in skill.skillBonusDict)
             {
-                if (i >= profStageLevel[idx + 1])
-                {
-                    idx++;
-                }
-                level += profMP[idx];
+                skilldb.GetSkill(temp.Key).skillLevel += temp.Value;
             }
-            if (character.gun != null)
-            {
-                gun = character.gun.effect.mp.max;
-            }
-
-            mp.max = _default + level + gun;
-        }
-
-        public void CalculateEXPBonus()
-        {
-            const int _default = 0;
-            int gun = 0;
-            int armor = 0;
-            int necklace = 0;
-            int avatar = 0;
-            int pendant = 0;
-            Character character = Character.GetInstance();
-            if (character.gun != null)
-            {
-                gun = character.gun.effect.expBonus;
-            }
-            if (character.armor != null)
-            {
-                armor = character.armor.effect.expBonus;
-            }
-            if (character.necklace != null)
-            {
-                necklace = character.necklace.effect.expBonus;
-            }
-            if (character.avatar != null)
-            {
-                avatar = character.avatar.effect.expBonus;
-            }
-            if (character.pendant != null)
-            {
-                pendant = character.pendant.effect.expBonus;
-            }
-
-            expBonus = _default + gun + armor + necklace + avatar + pendant;
-        }
-
-        public void CalculateGoldBonus()
-        {
-            const int _default = 0;
-            int gun = 0;
-            int armor = 0;
-            int necklace = 0;
-            int avatar = 0;
-            int pendant = 0;
-            Character character = Character.GetInstance();
-            if (character.gun != null)
-            {
-                gun = character.gun.effect.goldBonus;
-            }
-            if (character.armor != null)
-            {
-                armor = character.armor.effect.goldBonus;
-            }
-            if (character.necklace != null)
-            {
-                necklace = character.necklace.effect.goldBonus;
-            }
-            if (character.avatar != null)
-            {
-                avatar = character.avatar.effect.goldBonus;
-            }
-            if (character.pendant != null)
-            {
-                pendant = character.pendant.effect.goldBonus;
-            }
-
-            goldBonus = _default + gun + armor + necklace + avatar + pendant;
-        }
-
-        public void CalculateSPBonus()
-        {
-            const int _default = 0;
-            int gun = 0;
-            int armor = 0;
-            int necklace = 0;
-            int avatar = 0;
-            int pendant = 0;
-            Character character = Character.GetInstance();
-            if (character.gun != null)
-            {
-                gun = character.gun.effect.spBonus;
-            }
-            if (character.armor != null)
-            {
-                armor = character.armor.effect.spBonus;
-            }
-            if (character.necklace != null)
-            {
-                necklace = character.necklace.effect.spBonus;
-            }
-            if (character.avatar != null)
-            {
-                avatar = character.avatar.effect.spBonus;
-            }
-            if (character.pendant != null)
-            {
-                pendant = character.pendant.effect.spBonus;
-            }
-
-            spBonus = _default + gun + armor + necklace + avatar + pendant;
         }
     }
 }

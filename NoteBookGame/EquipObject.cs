@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NoteBookGame
 {
@@ -77,13 +73,13 @@ namespace NoteBookGame
         {
             // a:공 d:방 c:특방 w:인무 t:공속 h:HP m:MP r:HP회복 v:MP회복 e:EXP획 g:골드획 s:SP획
             // 기본
-            AddEquipObject(EquipObject.EquipObjectTypes.Gun, "기본총", 0, 0, 0, new Ability(""));
-            AddEquipObject(EquipObject.EquipObjectTypes.Armor, "기본갑옷", 0, 0, 0, new Ability(""));
-            AddEquipObject(EquipObject.EquipObjectTypes.Necklace, "기본목걸이", 0, 0, 0, new Ability(""));
-            AddEquipObject(EquipObject.EquipObjectTypes.Avatar, "기본아바타", 0, 0, 0, new Ability(""));
-            AddEquipObject(EquipObject.EquipObjectTypes.Pendant, "기본펜던트", 0, 0, 0, new Ability(""));
-            AddEquipObject(EquipObject.EquipObjectTypes.Others, "기본기타", 0, 0, 0, new Ability(""));
-            AddEquipObject(EquipObject.EquipObjectTypes.AbilityStone, "기본능력의돌", 0, 0, 0, new Ability(""));
+            AddEquipObject(EquipObject.EquipObjectTypes.Gun, "기본총", 0, 0, 0, new Ability());
+            AddEquipObject(EquipObject.EquipObjectTypes.Armor, "기본갑옷", 0, 0, 0, new Ability());
+            AddEquipObject(EquipObject.EquipObjectTypes.Necklace, "기본목걸이", 0, 0, 0, new Ability());
+            AddEquipObject(EquipObject.EquipObjectTypes.Avatar, "기본아바타", 0, 0, 0, new Ability());
+            AddEquipObject(EquipObject.EquipObjectTypes.Pendant, "기본펜던트", 0, 0, 0, new Ability());
+            AddEquipObject(EquipObject.EquipObjectTypes.Others, "기본기타", 0, 0, 0, new Ability());
+            AddEquipObject(EquipObject.EquipObjectTypes.AbilityStone, "기본능력의돌", 0, 0, 0, new Ability());
 
             // 0~1차 (Lv0~47)
             AddEquipObject(EquipObject.EquipObjectTypes.Gun, "낡은구식총", 3, 100, 1, new Ability("a16"));
@@ -126,20 +122,15 @@ namespace NoteBookGame
 
         public EquipObject Equip(string name)
         {
-            EquipObject equipObject = new EquipObject();
+            return GetEquipObject(name);
+        }
+
+        public EquipObject GetEquipObject(string name)
+        {
             for (int i = 0; i < equipObjectCount; i++)
-            {
-                if (equipObjects[i].name == name)
-                {
-                    equipObject.name = name;
-                    equipObject.level = equipObjects[i].level;
-                    equipObject.price = equipObjects[i].price;
-                    equipObject.weight = equipObjects[i].weight;
-                    equipObject.effect = equipObjects[i].effect;
-                    break;
-                }
-            }
-            return equipObject;
+                if (name == equipObjects[i].name)
+                    return equipObjects[i];
+            return null;
         }
     }
 }

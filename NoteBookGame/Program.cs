@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO;
 
 namespace NoteBookGame
@@ -131,7 +127,11 @@ namespace NoteBookGame
                         SkillMenu();
                         break;
                     case Screens.SkillChild:
-
+                        SkillChildMenu(selectedSkillLevelMin, selectedSkillLevelMax);
+                        break;
+                    case Screens.SkillChidStat:
+                        SkillChildStatMenu(selectedSkill);
+                        break;
                     case Screens.Save:
                         SaveMenu();
                         break;
@@ -358,7 +358,7 @@ namespace NoteBookGame
             {
                 case ConsoleKey.X:
                     Console.Clear();
-                    user.Get(skill);
+                    user.Learn(skill);
                     break;
                 case ConsoleKey.C:
                     Console.Clear();
@@ -462,16 +462,22 @@ namespace NoteBookGame
         {
             user.ability.CalculateProfession();
             user.ability.CalculateEXP();
-            user.ability.CalculateAttack();
-            user.ability.CalculateDefense();
-            user.ability.CalculateSpecialDefense();
-            user.ability.CalculateHP();
-            user.ability.CalculateMP();
-            user.ability.CalculateHPRecovery();
-            user.ability.CalculateMPRecovery();
-            user.ability.CalculateAttackSpeed();
-            user.ability.CalculateInventoryWeight();
-            user.ability.CalculateInventoryWeightBonus();
+
+            user.ability.CalculateDefault();
+            user.ability.CalculateLevel();
+            user.ability.CalculateEquipObject(user.gun);
+            user.ability.CalculateEquipObject(user.armor);
+            user.ability.CalculateEquipObject(user.necklace);
+            user.ability.CalculateEquipObject(user.avatar);
+            user.ability.CalculateEquipObject(user.pendant);
+            for(int i=0;i<skilldb.skillCount;i++)
+            {
+                if(skilldb.skills[i].type == Skill.SkillTypes.SkillBonus)
+                {
+                    user.ability.CalculateSkill(skilldb, skilldb.skills[i]);
+                }
+            }
+
             user.ability.CalculateDamage();
         }
 

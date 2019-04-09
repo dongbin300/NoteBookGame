@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace NoteBookGame
 {
@@ -73,7 +69,7 @@ namespace NoteBookGame
         {
             if (level >= eo.level)
             {
-                switch(eo.type)
+                switch (eo.type)
                 {
                     case EquipObject.EquipObjectTypes.Gun:
                         gun = eo;
@@ -125,15 +121,17 @@ namespace NoteBookGame
             }
         }
 
-        public void Get(Skill skill)
+        public void Learn(Skill skill)
         {
-            if(sp >= skill.sp)
+            SkillDB skilldb = SkillDB.GetInstance();
+
+            if (sp >= skill.sp)
             {
-                if(level >= skill.level)
+                if (level >= skill.level)
                 {
-                    if(skill.preSkill)
+                    if (skill.preSkillCheck(skilldb, skill))
                     {
-                        if(skill.skillLevel < skill.masterLevel)
+                        if (skill.skillLevel < skill.masterLevel)
                         {
                             sp -= skill.sp;
                             skill.skillLevel++;
