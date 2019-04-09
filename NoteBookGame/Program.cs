@@ -24,7 +24,6 @@ namespace NoteBookGame
         static Character user;
         static EODB eodb;
         static DeongeonDB deongeondb;
-        static SkillDB skilldb;
         static string menuOrder = "1234567890QWERTYUIOPASDFGHJKLZXCVBNM";
         static ConsoleKey[] keyOrder = { ConsoleKey.D1, ConsoleKey.D2, ConsoleKey.D3, ConsoleKey.D4, ConsoleKey.D5, ConsoleKey.D6, ConsoleKey.D7, ConsoleKey.D8, ConsoleKey.D9, ConsoleKey.D0, ConsoleKey.Q, ConsoleKey.W, ConsoleKey.E, ConsoleKey.R, ConsoleKey.T, ConsoleKey.Y, ConsoleKey.U, ConsoleKey.I, ConsoleKey.O, ConsoleKey.P, ConsoleKey.A, ConsoleKey.S, ConsoleKey.D, ConsoleKey.F, ConsoleKey.G, ConsoleKey.H, ConsoleKey.J, ConsoleKey.K, ConsoleKey.L, ConsoleKey.Z, ConsoleKey.X, ConsoleKey.C, ConsoleKey.V, ConsoleKey.B, ConsoleKey.N, ConsoleKey.M };
         static bool play;
@@ -70,7 +69,6 @@ namespace NoteBookGame
             user = Character.GetInstance();
             eodb = EODB.GetInstance();
             deongeondb = DeongeonDB.GetInstance();
-            skilldb = SkillDB.GetInstance();
 
             /* 캐릭터 로드 */
             FileStream fs = new FileStream("account.cha", FileMode.Open);
@@ -88,12 +86,15 @@ namespace NoteBookGame
             user.pendant = eodb.Equip(sr.ReadLine());
             user.others = eodb.Equip(sr.ReadLine());
             user.abilityStone = eodb.Equip(sr.ReadLine());
+            user.sp = int.Parse(sr.ReadLine());
+            for (int i = 0; i < user.skilldb.skillCount; i++)
+                user.skilldb.skills[i].skillLevel = int.Parse(sr.ReadLine());
             sr.Close();
             fs.Close();
             Console.WriteLine(">계정 데이터를 불러왔습니다.");
 
             /* 캐릭터 능력치 계산 */
-            user.ability = new Ability("");
+            user.ability = new Ability();
             CalculateCharacterAbility();
             user.ability.hp.current = user.ability.hp.max;
             user.ability.mp.current = user.ability.mp.max;
@@ -194,9 +195,17 @@ namespace NoteBookGame
                 ConsoleKeyInfo keys = Console.ReadKey(true);
                 switch (keys.Key)
                 {
+                    case ConsoleKey.Z:
+                        if (user.remainAttackCount <= 0)
+                        {
+                            Console.Clear();
+                            aliveMonster = user.Attack(monster, ShowSkillList());
+                            Console.WriteLine();
+                        }
+                        break;
                     case ConsoleKey.X:
                         Console.Clear();
-                        aliveMonster = user.Attack(monster);
+                        aliveMonster = user.remainAttackCount > 0 ? user.Attack(monster, user.remainSkill) : user.Attack(monster);
                         Console.WriteLine();
                         break;
                     case ConsoleKey.C:
@@ -210,11 +219,11 @@ namespace NoteBookGame
 
         static void DeongeonMonsterMenu(Deongeon deongeon)
         {
-            Console.WriteLine($"==={deongeon.name}===");
+            Console.WriteLine($"==={deongeon.name}(Lv{deongeon.minLevel}~{deongeon.maxLevel})===");
             Console.WriteLine(">[ESC] 나가기");
             for (int i = 0; i < deongeon.monsterCount; i++)
             {
-                Console.WriteLine($">[{menuOrder[i]}] {deongeon.monsters[i].name}");
+                Console.WriteLine($">[{menuOrder[i]}] {deongeon.monsters[i].name} Lv{deongeon.monsters[i].level}");
             }
             ConsoleKeyInfo keys = Console.ReadKey(true);
             for (int i = 0; i < deongeon.monsterCount; i++)
@@ -258,6 +267,56 @@ namespace NoteBookGame
                     Console.Clear();
                     screen = Screens.DeongeonMonster;
                     selectedDeongeon = deongeondb.human;
+                    break;
+                case ConsoleKey.D2:
+                    Console.Clear();
+                    screen = Screens.DeongeonMonster;
+                    selectedDeongeon = deongeondb.goblinWorld;
+                    break;
+                case ConsoleKey.D3:
+                    Console.Clear();
+                    screen = Screens.DeongeonMonster;
+                    selectedDeongeon = deongeondb.templeSuburb;
+                    break;
+                case ConsoleKey.D4:
+                    Console.Clear();
+                    screen = Screens.DeongeonMonster;
+                    selectedDeongeon = deongeondb.templeInside;
+                    break;
+                case ConsoleKey.D5:
+                    Console.Clear();
+                    screen = Screens.DeongeonMonster;
+                    selectedDeongeon = deongeondb.thiefHideout;
+                    break;
+                case ConsoleKey.D6:
+                    Console.Clear();
+                    screen = Screens.DeongeonMonster;
+                    selectedDeongeon = deongeondb.fairytaleWorld;
+                    break;
+                case ConsoleKey.D7:
+                    Console.Clear();
+                    screen = Screens.DeongeonMonster;
+                    selectedDeongeon = deongeondb.hiddenMap1;
+                    break;
+                case ConsoleKey.D8:
+                    Console.Clear();
+                    screen = Screens.DeongeonMonster;
+                    selectedDeongeon = deongeondb.hiddenMap2;
+                    break;
+                case ConsoleKey.D9:
+                    Console.Clear();
+                    screen = Screens.DeongeonMonster;
+                    selectedDeongeon = deongeondb.thunderGentlemanLodging;
+                    break;
+                case ConsoleKey.D0:
+                    Console.Clear();
+                    screen = Screens.DeongeonMonster;
+                    selectedDeongeon = deongeondb.headSpinLodging;
+                    break;
+                case ConsoleKey.Q:
+                    Console.Clear();
+                    screen = Screens.DeongeonMonster;
+                    selectedDeongeon = deongeondb.deongeonCorner;
                     break;
                 case ConsoleKey.Escape:
                     Console.Clear();
@@ -339,6 +398,26 @@ namespace NoteBookGame
                     screen = Screens.ShopChild;
                     equipObjectType = EquipObject.EquipObjectTypes.Gun;
                     break;
+                case ConsoleKey.D2:
+                    screen = Screens.ShopChild;
+                    equipObjectType = EquipObject.EquipObjectTypes.Armor;
+                    break;
+                case ConsoleKey.D3:
+                    screen = Screens.ShopChild;
+                    equipObjectType = EquipObject.EquipObjectTypes.Necklace;
+                    break;
+                case ConsoleKey.D4:
+                    screen = Screens.ShopChild;
+                    equipObjectType = EquipObject.EquipObjectTypes.Avatar;
+                    break;
+                case ConsoleKey.D5:
+                    screen = Screens.ShopChild;
+                    equipObjectType = EquipObject.EquipObjectTypes.Pendant;
+                    break;
+                case ConsoleKey.D6:
+                    screen = Screens.ShopChild;
+                    equipObjectType = EquipObject.EquipObjectTypes.Potion;
+                    break;
                 case ConsoleKey.Escape:
                     Console.Clear();
                     screen = Screens.Main;
@@ -361,6 +440,7 @@ namespace NoteBookGame
                     user.Learn(skill);
                     break;
                 case ConsoleKey.C:
+                case ConsoleKey.Escape:
                     Console.Clear();
                     screen = Screens.SkillChild;
                     break;
@@ -374,11 +454,11 @@ namespace NoteBookGame
             Console.WriteLine(">[ESC] 나가기");
             Skill[] tempSkills = new Skill[40];
             int idx = 0;
-            for (int i = 0; i < skilldb.skillCount; i++)
+            for (int i = 0; i < user.skilldb.skillCount; i++)
             {
-                if (skilldb.skills[i].level >= min && skilldb.skills[i].level <= max)
+                if (user.skilldb.skills[i].level >= min && user.skilldb.skills[i].level <= max)
                 {
-                    tempSkills[idx] = skilldb.skills[i];
+                    tempSkills[idx] = user.skilldb.skills[i];
                     Console.WriteLine($">[{menuOrder[idx]}] {tempSkills[idx].name}({tempSkills[idx].level}) Lv{tempSkills[idx].skillLevel}");
                     idx++;
                 }
@@ -444,6 +524,10 @@ namespace NoteBookGame
             sw.WriteLine(user.pendant.name);
             sw.WriteLine(user.others.name);
             sw.WriteLine(user.abilityStone.name);
+            sw.WriteLine(user.sp);
+            for (int i = 0; i < user.skilldb.skillCount; i++)
+                sw.WriteLine(user.skilldb.skills[i].skillLevel);
+            sw.WriteLine("END");
             sw.Flush();
             sw.Close();
             fsw.Close();
@@ -470,15 +554,13 @@ namespace NoteBookGame
             user.ability.CalculateEquipObject(user.necklace);
             user.ability.CalculateEquipObject(user.avatar);
             user.ability.CalculateEquipObject(user.pendant);
-            for(int i=0;i<skilldb.skillCount;i++)
+            for (int i = 0; i < user.skilldb.skillCount; i++)
             {
-                if(skilldb.skills[i].type == Skill.SkillTypes.SkillBonus)
+                if (user.skilldb.skills[i].type == Skill.SkillTypes.SkillBonus)
                 {
-                    user.ability.CalculateSkill(skilldb, skilldb.skills[i]);
+                    user.ability.CalculateSkill(user.skilldb, user.skilldb.skills[i]);
                 }
             }
-
-            user.ability.CalculateDamage();
         }
 
         static void ShowUserCurrentStat()
@@ -519,7 +601,15 @@ namespace NoteBookGame
             Console.WriteLine(">방어력: " + user.ability.defense);
             Console.WriteLine(">특수방어력: " + user.ability.specialDefense);
             Console.WriteLine();
-            Console.WriteLine(">[x] 공격");
+            if (user.remainAttackCount <= 0)
+            {
+                Console.WriteLine(">[z] 스킬");
+                Console.WriteLine(">[x] 공격");
+            }
+            else
+            {
+                Console.WriteLine($">[x] 공격 ({user.remainSkill.name} {user.remainAttackCount}번 남음)");
+            }
             Console.WriteLine(">[c] 도망");
             Console.WriteLine();
             Console.WriteLine(">몬스터 이름: " + monster.name);
@@ -537,6 +627,48 @@ namespace NoteBookGame
             Console.WriteLine(">골드: " + deongeondb.human.monsters[0].gold);
             Console.WriteLine(">경험치: " + deongeondb.human.monsters[0].exp);
             Console.WriteLine(">SP: " + deongeondb.human.monsters[0].sp);
+        }
+
+        static Skill ShowSkillList()
+        {
+            Console.WriteLine(">[ESC] 뒤로");
+            Skill[] tempSkills = new Skill[40];
+            int idx = 0;
+
+            for (int i = 0; i < user.skilldb.skillCount; i++)
+            {
+                if (user.skilldb.skills[i].type == Skill.SkillTypes.Active && user.skilldb.skills[i].skillLevel > 0)
+                {
+                    tempSkills[idx] = user.skilldb.skills[i];
+                    Console.WriteLine($">[{menuOrder[idx]}] {tempSkills[idx].name}");
+                    idx++;
+                }
+            }
+
+            ConsoleKeyInfo keys = Console.ReadKey(true);
+            for (int i = 0; i < idx; i++)
+            {
+                if (keys.Key == ConsoleKey.Escape)
+                {
+                    Console.Clear();
+                    return user.skilldb.GetSkill("aaa");
+                }
+                if (keys.Key == keyOrder[i])
+                {
+                    if (user.ability.mp.current >= tempSkills[i].mp)
+                    {
+                        Console.Clear();
+                        return tempSkills[i];
+                    }
+                    else
+                    {
+                        Console.Clear();
+                        Console.WriteLine(">MP가 부족합니다.");
+                        return user.skilldb.GetSkill("aaa");
+                    }
+                }
+            }
+            return user.skilldb.GetSkill("aaa");
         }
     }
 }

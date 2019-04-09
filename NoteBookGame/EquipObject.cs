@@ -4,7 +4,7 @@ namespace NoteBookGame
 {
     class EquipObject
     {
-        public enum EquipObjectTypes { Gun, Armor, Necklace, Avatar, Pendant, Others, AbilityStone };
+        public enum EquipObjectTypes { Gun, Armor, Necklace, Avatar, Pendant, Others, AbilityStone, Potion };
         public EquipObjectTypes type;
         public string name;
         public int level;
@@ -58,7 +58,7 @@ namespace NoteBookGame
             if (effect.spBonus != 0)
                 Console.WriteLine($"Sp획득 +{effect.spBonus}%");
 
-            Console.WriteLine($"{price}골드");
+            Console.WriteLine($"{price}골드 (현재골드 {Character.GetInstance().gold})");
         }
     }
 

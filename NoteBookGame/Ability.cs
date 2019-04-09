@@ -68,7 +68,15 @@ namespace NoteBookGame
         {
             damage = attack;
         }
-        
+
+        public void CalculateDamage(Skill skill)
+        {
+            damage = 0;
+            if (skill.damageP != 0)
+                damage += (int)(attack * ((skill.damageP + skill.damageUp * skill.skillLevel) / 100.0f));
+            damage += skill.damage + skill.damageUp * skill.skillLevel;
+        }
+
         // 가장 먼저 호출해야 함.
         public void CalculateDefault()
         {
@@ -162,7 +170,7 @@ namespace NoteBookGame
         public void CalculateEquipObject(EquipObject eo)
         {
             Character character = Character.GetInstance();
-            
+
             int eoAttack = eo.effect.attack;
             attack += eoAttack;
 
@@ -205,9 +213,12 @@ namespace NoteBookGame
 
         public void CalculateSkill(SkillDB skilldb, Skill skill)
         {
-            foreach (KeyValuePair<string, int> temp in skill.skillBonusDict)
+            if (skill.skillLevel > 0)
             {
-                skilldb.GetSkill(temp.Key).skillLevel += temp.Value;
+                foreach (KeyValuePair<string, int> temp in skill.skillBonusDict)
+                {
+                    skilldb.GetSkill(temp.Key).skillLevel += temp.Value * skill.skillLevel;
+                }
             }
         }
     }

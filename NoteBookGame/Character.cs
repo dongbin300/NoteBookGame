@@ -45,7 +45,7 @@ namespace NoteBookGame
         public long exp;
         public int gold;
         public int sp;
-        public Skill skill;
+        public SkillDB skilldb;
         public EquipObject gun;
         public EquipObject armor;
         public EquipObject necklace;
@@ -53,11 +53,14 @@ namespace NoteBookGame
         public EquipObject pendant;
         public EquipObject others;
         public EquipObject abilityStone;
+        public Skill remainSkill;
+        public int remainAttackCount;
 
         private static Character instance = new Character();
 
         private Character()
         {
+            skilldb = SkillDB.GetInstance();
         }
 
         public static Character GetInstance()
@@ -123,8 +126,6 @@ namespace NoteBookGame
 
         public void Learn(Skill skill)
         {
-            SkillDB skilldb = SkillDB.GetInstance();
-
             if (sp >= skill.sp)
             {
                 if (level >= skill.level)
@@ -160,8 +161,71 @@ namespace NoteBookGame
         public bool Attack(Monster monster)
         {
             ability.hp.current += ability.hpRecovery;
+            ability.CalculateDamage();
             monster.hpCur -= ability.damage;
-            Console.WriteLine($">{monster.name} 피해: {ability.damage}");
+            Console.WriteLine($">{monster.name} (평타) 피해: {ability.damage}");
+
+            /* 몬스터가 죽음 */
+            if (monster.hpCur <= 0)
+            {
+                monster.Dispose();
+                int getGold = (int)(monster.gold * (1 + (float)ability.goldBonus / 100));
+                int getExp = (int)(monster.exp * (1 + (float)ability.expBonus / 100));
+                int getSp = (int)(monster.sp * (1 + (float)ability.spBonus / 100));
+                gold += getGold;
+                exp += getExp;
+                sp += getSp;
+                LevelUp();
+                Console.WriteLine($">{monster.name}를 잡았습니다. 골드+ {getGold}, Exp+ {getExp}, Sp+ {getSp}");
+
+                return false;
+            }
+            else
+            {
+                Random random = new Random();
+                int specialDefenseOn = random.Next(2);
+                int monsterDamage = monster.attack - ability.defense / 10 - ability.specialDefense / 10 * specialDefenseOn;
+                /* 몬스터의 공격력이 캐릭터의 방어력보다 낮음 */
+                if (monsterDamage < 0)
+                {
+                    monsterDamage = 0;
+                }
+
+                ability.hp.current -= monsterDamage;
+                Console.WriteLine($">{nickname} 피해: {monsterDamage}");
+
+                /* 캐릭터가 죽음 */
+                if (ability.hp.current <= 0)
+                {
+                    return false;
+                }
+
+                return true;
+            }
+        }
+
+        public bool Attack(Monster monster, Skill skill)
+        {
+            ability.hp.current += ability.hpRecovery;
+            if (skill.code == "aaa")
+            {
+                ability.CalculateDamage();
+                monster.hpCur -= ability.damage;
+            }
+            else
+            {
+                if (remainAttackCount <= 0)
+                {
+                    ability.mp.current -= skill.mp;
+                    remainSkill = skill;
+                    remainAttackCount += skill.attackCount;
+                }
+                ability.CalculateDamage(skill);
+                monster.hpCur -= ability.damage;
+                remainAttackCount--;
+            }
+
+            Console.WriteLine($">{monster.name} 피해: ({skill.name}) {ability.damage}");
 
             /* 몬스터가 죽음 */
             if (monster.hpCur <= 0)

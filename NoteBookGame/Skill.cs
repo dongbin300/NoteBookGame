@@ -24,7 +24,7 @@ namespace NoteBookGame
         public Dictionary<string, int> effectDict = new Dictionary<string, int>();
         public Dictionary<string, int> preSkillDict = new Dictionary<string, int>();
         public Dictionary<string, int> skillBonusDict = new Dictionary<string, int>();
-        
+
         public Skill()
         {
 
@@ -37,9 +37,10 @@ namespace NoteBookGame
             this.code = code;
             this.name = name;
             this.level = level;
+            this.preSkill = preSkill;
             this.sp = sp;
             this.mp = mp;
-            masterLevel = 0;
+            masterLevel = 100;
 
             effectDict = FormatString.ParseInt(effect);
 
@@ -51,6 +52,7 @@ namespace NoteBookGame
                     case "p": damageP = temp.Value; break;
                     case "c": attackCount = temp.Value; break;
                     case "+": damageUp = temp.Value; break;
+                    case "m": masterLevel = temp.Value; break;
                 }
             }
         }
@@ -62,9 +64,10 @@ namespace NoteBookGame
             this.code = code;
             this.name = name;
             this.level = level;
+            this.preSkill = preSkill;
             masterLevel = 1;
 
-            Dictionary<string, int> effectDict = FormatString.ParseInt(effect);
+            effectDict = FormatString.ParseInt(effect);
 
             foreach (KeyValuePair<string, int> temp in effectDict)
             {
@@ -79,10 +82,11 @@ namespace NoteBookGame
             this.code = code;
             this.name = name;
             this.level = level;
+            this.preSkill = preSkill;
             this.sp = sp;
-            masterLevel = 0;
+            masterLevel = 100;
 
-            Dictionary<string, int> effectDict = FormatString.ParseInt(effect);
+            effectDict = FormatString.ParseInt(effect);
             Ability passiveEffect = new Ability();
 
             foreach (KeyValuePair<string, int> temp in effectDict)
@@ -119,12 +123,26 @@ namespace NoteBookGame
 
         public void ShowDescription()
         {
+            SkillDB skilldb = SkillDB.GetInstance();
+
             Console.WriteLine($"==={name}===");
-            Console.WriteLine($"필요레벨 {level}");
+            Console.WriteLine($"-필요");
+            Console.WriteLine($"캐릭터레벨 {level}");
+            preSkillCheck(skilldb, this);
+            if (preSkillDict.Count > 0)
+                foreach (KeyValuePair<string, int> temp in preSkillDict)
+                    Console.WriteLine($"{skilldb.GetSkill(temp.Key).name} Lv{temp.Value}");
             Console.WriteLine($"스킬레벨 {skillLevel} / {masterLevel}");
             Console.WriteLine($"MP {mp}");
-
-            Console.WriteLine($"{sp}SP");
+            Console.WriteLine();
+            if (damage != 0)
+                Console.WriteLine($"공격력 {damage + damageUp * skillLevel} + {damageUp}");
+            if (damageP != 0)
+                Console.WriteLine($"공격력 {damageP + damageUp * skillLevel}% + {damageUp}%");
+            if (attackCount != 0)
+                Console.WriteLine($"공격회수 {attackCount}");
+            Console.WriteLine();
+            Console.WriteLine($"{sp}SP (현재SP {Character.GetInstance().sp})");
         }
     }
 
@@ -138,6 +156,7 @@ namespace NoteBookGame
         private SkillDB()
         {
             //s:고정뎀 p:퍼뎀 c:공격회수 +:스킬레벨+ 증가치
+            AddSkill("aaa", "평타", 0, 0, 0, "c1m1");
             AddSkill("aa", "라이징샷", 3, 20, 16, "p100+25c1");
             AddSkill("ab", "잭스파이크", 5, 20, 18, "p135+5c1");
             AddSkill("ac", "개틀링건M-20", 5, 20, 23, "s85+8c10");

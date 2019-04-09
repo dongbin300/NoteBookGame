@@ -226,6 +226,12 @@
             hiddenMap2.AddMonster("eighty", 501, 3900000000, 1060000, 2250000, 11);
             hiddenMap2.AddMonster("ninety", 600, 2500000000000, 2200000000, 4500000000, 50000);
             hiddenMap2.AddMonster("hundred", 700, 8500000000000, 7000000000, 14000000000, 160000);
+            deongeonCorner.AddMonster("쿠트", 505, 10000000000, 2250000, 4800000, 12);
+            deongeonCorner.AddMonster("쿠파", 510, 20000000000, 4000000, 9000000, 12);
+            deongeonCorner.AddMonster("쿠파파", 515, 30000000000, 5500000, 15000000, 12);
+            deongeonCorner.AddMonster("부기", 520, 80000000000, 11000000, 30000000, 13);
+            thunderGentlemanLodging.AddMonster("썬더젠틀맨", 1000, 500000000000000, 5000000000000, 10000000000000, 100000000);
+            headSpinLodging.AddMonster("헤드스핀", 1200, 2000000000000000, 40000000000000, 80000000000000, 1000000000);
         }
 
         public static DeongeonDB GetInstance()

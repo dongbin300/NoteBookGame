@@ -26,7 +26,7 @@ namespace NoteBookGame
             this.gold = gold;
             this.exp = exp;
             this.sp = sp;
-            attack = (int)Math.Sqrt(hpMax);
+            attack = (int)Math.Pow(hpMax, 0.5398);
         }
 
         public static Monster Create(Deongeon deongeon, string name)

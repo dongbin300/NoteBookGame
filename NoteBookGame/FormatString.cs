@@ -25,6 +25,11 @@ namespace NoteBookGame
                             type = "value";
                             s = i;
                         }
+                        if (i == code.Length - 1)
+                        {
+                            value = int.Parse(code.Substring(s, i - s + 1));
+                            items.Add(name, value);
+                        }
                         break;
                     case "value":
                         if (i == code.Length - 1)
@@ -64,6 +69,11 @@ namespace NoteBookGame
                             name = code.Substring(s, i - s);
                             type = "value";
                             s = i;
+                        }
+                        if (i == code.Length - 1)
+                        {
+                            value = double.Parse(code.Substring(s, i - s + 1));
+                            items.Add(name, value);
                         }
                         break;
                     case "value":
