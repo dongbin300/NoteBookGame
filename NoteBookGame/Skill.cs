@@ -40,7 +40,7 @@ namespace NoteBookGame
             this.preSkill = preSkill;
             this.sp = sp;
             this.mp = mp;
-            masterLevel = 100;
+            masterLevel = 999;
 
             effectDict = FormatString.ParseInt(effect);
 
@@ -84,7 +84,7 @@ namespace NoteBookGame
             this.level = level;
             this.preSkill = preSkill;
             this.sp = sp;
-            masterLevel = 100;
+            masterLevel = 999;
 
             effectDict = FormatString.ParseInt(effect);
             Ability passiveEffect = new Ability();
@@ -159,14 +159,30 @@ namespace NoteBookGame
             AddSkill("aaa", "평타", 0, 0, 0, "c1m1");
             AddSkill("aa", "라이징샷", 3, 20, 16, "p100+25c1");
             AddSkill("ab", "잭스파이크", 5, 20, 18, "p135+5c1");
-            AddSkill("ac", "개틀링건M-20", 5, 20, 23, "s85+8c10");
+            AddSkill("ac", "개틀링건 M-20", 5, 20, 23, "s85+8c10");
             AddSkill("ad", "퍼니셔", 7, 25, 21, "s92+17c5");
             AddSkill("ae", "윈드밀", 18, 20, 28, "s185+35c1");
-            AddSkill("af", "화염방사기F-70", 20, 25, 35, "s132+18c8");
+            AddSkill("af", "화염방사기 F-70", 20, 25, 35, "s132+18c8");
             AddSkill("ag", "바베큐", 25, 30, 35, "s177+31c10", "ab5ac3");
             AddSkill("ah", "슈타이어", 30, 30, 36, "s1330+86c1");
             AddSkill("ai", "마하킥", 35, 30, 32, "s520+104c1");
-            AddSkill("aj", "슈타이어마스터", 40, "ac1af1ag1ah1ai1");
+
+            AddSkill("aj", "슈타이어 마스터", 40, "ac1af1ag1ah1ai1");
+            AddSkill("ak", "핸드캐넌 마스터리", 48, 30, "t3m33");
+            AddSkill("al", "레이저 라이플", 50, 35, 48, "s278+57c12");
+            AddSkill("am", "라이징 윈드밀", 55, 30, 36, "s725+65c1");
+            AddSkill("an", "하이퍼바디", 60, 35, "h5");
+            AddSkill("ao", "라마건 M-17", 65, 40, 60, "s788+184c1");
+            AddSkill("ap", "양자폭탄", 68, 50, 200, "s5576+370c1");
+            AddSkill("aq", "스피드스타", 75, 65, 88, "s725+210c2");
+            AddSkill("ar", "세블", 85, 70, 65, "s2060+205c5");
+            AddSkill("as", "양자폭탄 2", 90, 60, 300, "s7400+400c1", "ap5");
+
+            AddSkill("at", "라마건 M-18", 95, 70, 115, "s805+1425c1", "ah3ao10ap1aq1ar3");
+            AddSkill("au", "레어 슈타이어", 100, 80, 120, "s1900+3660c1", "aa5ag3ah7ai3ar5at3");
+            AddSkill("au", "중화기 다루기", 105, "ac2af2ag1ah1ak1al1ao3ar2at3au1");
+            AddSkill("au", "플리전트", 115, 100, 180, "s4438+3939c4", "ar10as5at10au5");
+            AddSkill("au", "헤드샷", 120, 100, 85, "s7258+11255c1");
         }
 
         public static SkillDB GetInstance()

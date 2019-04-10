@@ -48,6 +48,7 @@
     <Compile Include="Deongeon.cs" />
     <Compile Include="EquipObject.cs" />
     <Compile Include="FormatString.cs" />
+    <Compile Include="MagicNumber.cs" />
     <Compile Include="Monster.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -55,6 +56,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="TODO.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

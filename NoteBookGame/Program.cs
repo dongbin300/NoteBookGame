@@ -18,14 +18,17 @@ namespace NoteBookGame
         static Deongeon selectedDeongeon;
         static EquipObject.EquipObjectTypes equipObjectType;
         static EquipObject selectedEquipObject;
-        static int selectedSkillLevelMin, selectedSkillLevelMax;
+        static int selectedEquipObjectLevelMin, selectedEquipObjectLevelMax;
         static Skill selectedSkill;
+        static int selectedSkillLevelMin, selectedSkillLevelMax;
 
         static Character user;
         static EODB eodb;
         static DeongeonDB deongeondb;
+        static MagicNumber magicNumber;
         static string menuOrder = "1234567890QWERTYUIOPASDFGHJKLZXCVBNM";
         static ConsoleKey[] keyOrder = { ConsoleKey.D1, ConsoleKey.D2, ConsoleKey.D3, ConsoleKey.D4, ConsoleKey.D5, ConsoleKey.D6, ConsoleKey.D7, ConsoleKey.D8, ConsoleKey.D9, ConsoleKey.D0, ConsoleKey.Q, ConsoleKey.W, ConsoleKey.E, ConsoleKey.R, ConsoleKey.T, ConsoleKey.Y, ConsoleKey.U, ConsoleKey.I, ConsoleKey.O, ConsoleKey.P, ConsoleKey.A, ConsoleKey.S, ConsoleKey.D, ConsoleKey.F, ConsoleKey.G, ConsoleKey.H, ConsoleKey.J, ConsoleKey.K, ConsoleKey.L, ConsoleKey.Z, ConsoleKey.X, ConsoleKey.C, ConsoleKey.V, ConsoleKey.B, ConsoleKey.N, ConsoleKey.M };
+        static int mNum;
         static bool play;
 
         static void Main(string[] args)
@@ -69,16 +72,21 @@ namespace NoteBookGame
             user = Character.GetInstance();
             eodb = EODB.GetInstance();
             deongeondb = DeongeonDB.GetInstance();
+            magicNumber = new MagicNumber();
 
             /* 캐릭터 로드 */
             FileStream fs = new FileStream("account.cha", FileMode.Open);
             StreamReader sr = new StreamReader(fs);
+            sr.ReadLine();
+            mNum = int.Parse(sr.ReadLine());
             user.nickname = sr.ReadLine();
             user.profession = sr.ReadLine();
             user.level = int.Parse(sr.ReadLine());
             user.questProgress = int.Parse(sr.ReadLine());
             user.exp = int.Parse(sr.ReadLine());
             user.gold = int.Parse(sr.ReadLine());
+            int currentHp = int.Parse(sr.ReadLine());
+            int currentMp = int.Parse(sr.ReadLine());
             user.gun = eodb.Equip(sr.ReadLine());
             user.armor = eodb.Equip(sr.ReadLine());
             user.necklace = eodb.Equip(sr.ReadLine());
@@ -92,12 +100,22 @@ namespace NoteBookGame
             sr.Close();
             fs.Close();
             Console.WriteLine(">계정 데이터를 불러왔습니다.");
-
+            
             /* 캐릭터 능력치 계산 */
             user.ability = new Ability();
             CalculateCharacterAbility();
-            user.ability.hp.current = user.ability.hp.max;
-            user.ability.mp.current = user.ability.mp.max;
+            user.ability.hp.current = currentHp;
+            user.ability.mp.current = currentMp;
+
+            /* 매직 넘버 체크(부정행위 확인) */
+            if (magicNumber.isRight(user, mNum))
+                Console.WriteLine(">보안 코드가 일치합니다.");
+            else
+            {
+                Console.WriteLine(">보안 코드가 일치하지 않습니다.");
+                Console.WriteLine(">게임을 종료합니다.");
+                return;
+            }
 
             play = true;
             screen = Screens.Main;
@@ -119,7 +137,7 @@ namespace NoteBookGame
                         ShopMenu();
                         break;
                     case Screens.ShopChild:
-                        ShopChildMenu(equipObjectType);
+                        ShopChildMenu(equipObjectType, selectedEquipObjectLevelMin, selectedEquipObjectLevelMax);
                         break;
                     case Screens.ShopChildStat:
                         ShopChildStatMenu(selectedEquipObject);
@@ -145,7 +163,7 @@ namespace NoteBookGame
 
         static void MainMenu()
         {
-            Console.WriteLine("===던파 RPG===");
+            Console.WriteLine("===던파 RPG Beta1.0.1===");
             Console.WriteLine(">[1] 던전");
             Console.WriteLine(">[2] 상점");
             //Console.WriteLine(">[3] 던전");
@@ -346,16 +364,16 @@ namespace NoteBookGame
             }
         }
 
-        static void ShopChildMenu(EquipObject.EquipObjectTypes type)
+        static void ShopChildMenu(EquipObject.EquipObjectTypes type, int min, int max)
         {
             Console.Clear();
-            Console.WriteLine($"==={type}===");
+            Console.WriteLine($"==={type} (Lv{min}~{max})===");
             Console.WriteLine(">[ESC] 나가기");
             EquipObject[] tempEquipObjects = new EquipObject[40];
             int idx = 0;
             for (int i = 0; i < eodb.equipObjectCount; i++)
             {
-                if (eodb.equipObjects[i].type == type)
+                if (eodb.equipObjects[i].type == type && eodb.equipObjects[i].level >= min && eodb.equipObjects[i].level <= max)
                 {
                     tempEquipObjects[idx] = eodb.equipObjects[i];
                     Console.WriteLine($">[{menuOrder[idx]}] {tempEquipObjects[idx].name} Lv{tempEquipObjects[idx].level}");
@@ -384,12 +402,15 @@ namespace NoteBookGame
             Console.Clear();
             Console.WriteLine("===상점===");
             Console.WriteLine(">[ESC] 나가기");
-            Console.WriteLine(">[1] 총");
-            Console.WriteLine(">[2] 갑옷");
-            Console.WriteLine(">[3] 목걸이");
-            Console.WriteLine(">[4] 아바타");
-            Console.WriteLine(">[5] 펜던트");
-            Console.WriteLine(">[6] 포션");
+            Console.WriteLine(">[1] 총 (Lv1~160)");
+            Console.WriteLine(">[2] 총 (Lv161~500)");
+            Console.WriteLine(">[3] 갑옷 (Lv1~160)");
+            Console.WriteLine(">[4] 갑옷 (Lv161~500)");
+            Console.WriteLine(">[5] 목걸이 (Lv1~160)");
+            Console.WriteLine(">[6] 목걸이 (Lv161~500)");
+            Console.WriteLine(">[7] 아바타");
+            Console.WriteLine(">[8] 펜던트");
+            Console.WriteLine(">[9] 포션");
 
             ConsoleKeyInfo keys = Console.ReadKey(true);
             switch (keys.Key)
@@ -397,26 +418,56 @@ namespace NoteBookGame
                 case ConsoleKey.D1:
                     screen = Screens.ShopChild;
                     equipObjectType = EquipObject.EquipObjectTypes.Gun;
+                    selectedEquipObjectLevelMin = 1;
+                    selectedEquipObjectLevelMax = 160;
                     break;
                 case ConsoleKey.D2:
                     screen = Screens.ShopChild;
-                    equipObjectType = EquipObject.EquipObjectTypes.Armor;
+                    equipObjectType = EquipObject.EquipObjectTypes.Gun;
+                    selectedEquipObjectLevelMin = 161;
+                    selectedEquipObjectLevelMax = 500;
                     break;
                 case ConsoleKey.D3:
                     screen = Screens.ShopChild;
-                    equipObjectType = EquipObject.EquipObjectTypes.Necklace;
+                    equipObjectType = EquipObject.EquipObjectTypes.Armor;
+                    selectedEquipObjectLevelMin = 1;
+                    selectedEquipObjectLevelMax = 160;
                     break;
                 case ConsoleKey.D4:
                     screen = Screens.ShopChild;
-                    equipObjectType = EquipObject.EquipObjectTypes.Avatar;
+                    equipObjectType = EquipObject.EquipObjectTypes.Armor;
+                    selectedEquipObjectLevelMin = 161;
+                    selectedEquipObjectLevelMax = 500;
                     break;
                 case ConsoleKey.D5:
                     screen = Screens.ShopChild;
-                    equipObjectType = EquipObject.EquipObjectTypes.Pendant;
+                    equipObjectType = EquipObject.EquipObjectTypes.Necklace;
+                    selectedEquipObjectLevelMin = 1;
+                    selectedEquipObjectLevelMax = 160;
                     break;
                 case ConsoleKey.D6:
                     screen = Screens.ShopChild;
+                    equipObjectType = EquipObject.EquipObjectTypes.Necklace;
+                    selectedEquipObjectLevelMin = 161;
+                    selectedEquipObjectLevelMax = 500;
+                    break;
+                case ConsoleKey.D7:
+                    screen = Screens.ShopChild;
+                    equipObjectType = EquipObject.EquipObjectTypes.Avatar;
+                    selectedEquipObjectLevelMin = 1;
+                    selectedEquipObjectLevelMax = 500;
+                    break;
+                case ConsoleKey.D8:
+                    screen = Screens.ShopChild;
+                    equipObjectType = EquipObject.EquipObjectTypes.Pendant;
+                    selectedEquipObjectLevelMin = 1;
+                    selectedEquipObjectLevelMax = 500;
+                    break;
+                case ConsoleKey.D9:
+                    screen = Screens.ShopChild;
                     equipObjectType = EquipObject.EquipObjectTypes.Potion;
+                    selectedEquipObjectLevelMin = 1;
+                    selectedEquipObjectLevelMax = 500;
                     break;
                 case ConsoleKey.Escape:
                     Console.Clear();
@@ -499,6 +550,26 @@ namespace NoteBookGame
                     selectedSkillLevelMin = 0;
                     selectedSkillLevelMax = 67;
                     break;
+                case ConsoleKey.D2:
+                    screen = Screens.SkillChild;
+                    selectedSkillLevelMin = 68;
+                    selectedSkillLevelMax = 127;
+                    break;
+                case ConsoleKey.D3:
+                    screen = Screens.SkillChild;
+                    selectedSkillLevelMin = 128;
+                    selectedSkillLevelMax = 227;
+                    break;
+                case ConsoleKey.D4:
+                    screen = Screens.SkillChild;
+                    selectedSkillLevelMin = 228;
+                    selectedSkillLevelMax = 407;
+                    break;
+                case ConsoleKey.D5:
+                    screen = Screens.SkillChild;
+                    selectedSkillLevelMin = 408;
+                    selectedSkillLevelMax = 500;
+                    break;
                 case ConsoleKey.Escape:
                     Console.Clear();
                     screen = Screens.Main;
@@ -511,12 +582,16 @@ namespace NoteBookGame
             Console.Clear();
             FileStream fsw = new FileStream("account.cha", FileMode.Open);
             StreamWriter sw = new StreamWriter(fsw);
+            sw.WriteLine("!이 파일을 임의로 조작하지 마십시오. 게임이 실행되지 않습니다.");
+            sw.WriteLine(magicNumber.Create(user));
             sw.WriteLine(user.nickname);
             sw.WriteLine(user.profession);
             sw.WriteLine(user.level);
             sw.WriteLine(user.questProgress);
             sw.WriteLine(user.exp);
             sw.WriteLine(user.gold);
+            sw.WriteLine(user.ability.hp.current);
+            sw.WriteLine(user.ability.mp.current);
             sw.WriteLine(user.gun.name);
             sw.WriteLine(user.armor.name);
             sw.WriteLine(user.necklace.name);
@@ -527,7 +602,7 @@ namespace NoteBookGame
             sw.WriteLine(user.sp);
             for (int i = 0; i < user.skilldb.skillCount; i++)
                 sw.WriteLine(user.skilldb.skills[i].skillLevel);
-            sw.WriteLine("END");
+            sw.WriteLine("END ");
             sw.Flush();
             sw.Close();
             fsw.Close();
@@ -556,7 +631,7 @@ namespace NoteBookGame
             user.ability.CalculateEquipObject(user.pendant);
             for (int i = 0; i < user.skilldb.skillCount; i++)
             {
-                if (user.skilldb.skills[i].type == Skill.SkillTypes.SkillBonus)
+                if (user.skilldb.skills[i].type != Skill.SkillTypes.Active)
                 {
                     user.ability.CalculateSkill(user.skilldb, user.skilldb.skills[i]);
                 }

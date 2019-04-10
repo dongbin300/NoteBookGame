@@ -95,6 +95,12 @@ namespace NoteBookGame
                     case EquipObject.EquipObjectTypes.AbilityStone:
                         abilityStone = eo;
                         break;
+                    case EquipObject.EquipObjectTypes.Potion:
+                        ability.hp.current += eo.effect.hpInstantRecovery;
+                        if (ability.hp.current > ability.hp.max) ability.hp.current = ability.hp.max;
+                        ability.mp.current += eo.effect.mpInstantRecovery;
+                        if (ability.mp.current > ability.mp.max) ability.mp.current = ability.mp.max;
+                        break;
                 }
                 Console.WriteLine(">" + eo.name + "을 장착했습니다.");
             }

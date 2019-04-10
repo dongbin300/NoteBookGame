@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace NoteBookGame
 {
@@ -25,10 +26,14 @@ namespace NoteBookGame
         public int expBonus;
         public int goldBonus;
         public int spBonus;
+        public int hpInstantRecovery;
+        public int mpInstantRecovery;
+
+        public Dictionary<string, int> effectDict = new Dictionary<string, int>();
 
         public Ability(string effect = "")
         {
-            Dictionary<string, int> effectDict = FormatString.ParseInt(effect);
+            effectDict = FormatString.ParseInt(effect);
 
             foreach (KeyValuePair<string, int> temp in effectDict)
             {
@@ -46,6 +51,9 @@ namespace NoteBookGame
                     case "e": expBonus = temp.Value; break;
                     case "g": goldBonus = temp.Value; break;
                     case "s": spBonus = temp.Value; break;
+                    case "hr": hpInstantRecovery = temp.Value; break;
+                    case "mr": mpInstantRecovery = temp.Value; break;
+                    default: break;
                 }
             }
         }
@@ -67,6 +75,14 @@ namespace NoteBookGame
         public void CalculateDamage()
         {
             damage = attack;
+
+            Random rnd = new Random();
+
+            int range = (int)((float)damage * (0.25 - (float)attackSpeed * 0.001));
+            if (rnd.Next(2) == 0)
+                damage -= rnd.Next(range) + 1;
+            else
+                damage += rnd.Next(range) + 1;
         }
 
         public void CalculateDamage(Skill skill)
@@ -75,6 +91,14 @@ namespace NoteBookGame
             if (skill.damageP != 0)
                 damage += (int)(attack * ((skill.damageP + skill.damageUp * skill.skillLevel) / 100.0f));
             damage += skill.damage + skill.damageUp * skill.skillLevel;
+
+            Random rnd = new Random();
+
+            int range = (int)((float)damage * (0.25 - (float)attackSpeed * 0.001));
+            if (rnd.Next(2) == 0)
+                damage -= rnd.Next(range) + 1;
+            else
+                damage += rnd.Next(range) + 1;
         }
 
         // 가장 먼저 호출해야 함.
@@ -209,15 +233,35 @@ namespace NoteBookGame
 
             int eoSpBonus = eo.effect.spBonus;
             spBonus += eoSpBonus;
-        }
 
+            // 스킬레벨+ 무기 효과
+            foreach (KeyValuePair<string, int> temp in eo.effect.effectDict)
+            {
+                if (temp.Key.Length == 2)
+                    character.skilldb.GetSkill(temp.Key).skillLevel += temp.Value;
+            }
+        }
+        
         public void CalculateSkill(SkillDB skilldb, Skill skill)
         {
             if (skill.skillLevel > 0)
             {
-                foreach (KeyValuePair<string, int> temp in skill.skillBonusDict)
+                switch (skill.type)
                 {
-                    skilldb.GetSkill(temp.Key).skillLevel += temp.Value * skill.skillLevel;
+                    // 패시브스킬 효과
+                    case Skill.SkillTypes.Passive:
+                        foreach (KeyValuePair<string, int> temp in skill.effectDict)
+                        {
+                            skilldb.GetSkill(temp.Key).skillLevel += temp.Value * skill.skillLevel;
+                        }
+                        break;
+                    // 스킬레벨+ 스킬 효과
+                    case Skill.SkillTypes.SkillBonus:
+                        foreach (KeyValuePair<string, int> temp in skill.skillBonusDict)
+                        {
+                            skilldb.GetSkill(temp.Key).skillLevel += temp.Value * skill.skillLevel;
+                        }
+                        break;
                 }
             }
         }
